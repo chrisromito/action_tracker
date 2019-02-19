@@ -1,0 +1,61 @@
+// Provide helper classes for padding, margins, positioning, & alignment
+
+//-- Padding & margin helper classes
+
+@for $n from 0 through 10 {
+    $size: $n * 5; // 0, 5, 10, 15, 20,... 50
+
+    .pad--#{$size} {
+        padding: #{$size}px;
+    }
+
+    .pad--v-#{$size} {
+        padding-top: #{$size}px;
+        padding-bottom: #{$size}px;
+    }
+
+    .pad--h-#{$size} {
+        padding-left: #{$size}px;
+        padding-right: #{$size}px;
+    }
+
+    //-- Margin
+    .margin--#{$size} {
+        margin: #{$size}px;
+    }
+
+    .margin--v-#{$size} {
+        margin-top: #{$size}px;
+        margin-bottom: #{$size}px;
+    }
+
+    .margin--h-#{$size} {
+        margin-left: #{$size}px;
+        margin-right: #{$size}px;
+    }
+
+    @each $direction in 'top', 'right', 'bottom', 'left' {
+        .margin--#{$direction}-#{$size}, .margin--auto.margin--#{$direction}-#{$size} {
+            margin-#{$direction}: #{$size}px;
+        }
+
+        .padding--#{$direction}-#{$size},
+        .pad--#{$direction}-#{$size} {
+            padding-#{$direction}: #{$size}px;
+        }
+    }
+}
+
+// Negation
+
+.margin--auto { margin: auto; }
+.margin--no-top { margin-top: 0; }
+.margin--no-right { margin-right: 0; }
+.margin--no-bottom { margin-bottom: 0; }
+.margin--no-left { margin-left: 0; }
+
+
+.padding--no-top { padding-top: 0; }
+.padding--no-right { padding-right: 0; }
+.padding--no-bottom { padding-bottom: 0; }
+.padding--no-left { padding-left: 0; }

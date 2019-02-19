@@ -1,0 +1,153 @@
+@import "../styles/display";
+@import "../styles/sizing";
+@import "../styles/spacing";
+@import "../styles/colors";
+
+
+//-- Chart Styles
+//*============================================*//
+.chart--container {
+    margin: 20px auto 0 auto;
+}
+
+.chartist-tooltip {
+    position: absolute;
+    font-size: 12px;
+    color: $text-on-dark;
+    background: transparent;
+
+    .chartist-tooltip-value {
+        display: block;
+        width: auto;
+        height: auto;
+    }
+
+    .chart--tooltip-body {
+        padding: 12px;
+        background: $primary-dark;
+    }
+}
+
+//-- Axis labels
+.ct-axis-title {
+    color: $primary-dark;
+    fill: $primary-dark;
+}
+
+//-- Points along the line graph
+.point--custom.ct-area {
+    fill-opacity: 0.9;
+}
+
+
+// Provide defaults for chartist to work with
+$ct-text-color: rgba($primary-dark, 0.4);
+$ct-grid-color: rgba($primary-dark, 0.15);
+
+
+@import 'chartist/dist/scss/chartist.scss';
+
+
+
+
+//-- Layout/ordering
+
+//-- Add width--${%}-device classes
+@media(max-width: $tablet) {
+    .width--100-phone {
+        width: 100%;
+    }
+    .width--50-phone {
+        width: 50%;
+    }
+}
+
+@media(min-width: $tablet) and (max-width: $desktop) {
+    .width--100-tablet {
+        width: 100%;
+    }
+    .width--50-tablet {
+        width: 50%;
+    }
+}
+
+@media(min-width: $desktop) {
+    .width--100-desktop {
+        width: 100%;
+    }
+    .width--50-desktop {
+        width: 50%;
+    }
+}
+
+@media(min-width: $tablet) {
+    .predictors-component--container {
+        width: 90%;
+        margin: auto;
+    }
+}
+
+
+
+//-- Form styles
+//*============================================*//
+.input-width {
+    width: 300px;
+    max-width: 100%;
+}
+
+
+.pal--select {
+    @extend .input-width;
+}
+
+
+.input-group {
+    padding-bottom: 10px;
+    margin: 5px 5px 10px 5px;
+
+    .mdc-text-field:not(.input-group--50), .mdc-slider {
+        @extend .input-width;
+        margin-left: 5px;
+    }
+
+    .input-group--50.mdc-text-field {
+        margin: 0 5px;        
+    }
+
+    @media(min-width: $tablet) {
+        .input-group--50.mdc-text-field {
+            width: calc(50% - 15px);
+        }
+    }
+
+}
+
+
+
+.predictors-component--group {
+    @extend .width--100;
+    padding: 0 0 2.5rem 0;
+    flex-direction: column;
+}
+
+
+//-- Info dialog
+.mdc-dialog__content {
+    overflow-x: hidden;
+}
+
+.app--dialog .mdc-dialog__container {
+    width: 750px;
+    max-width: 100%;
+
+    .mdc-dialog__surface {
+        width: 100%;
+    }
+}
+
+.app--code {
+    white-space: initial;
+    padding: 1.0rem 0.5rem;
+    background-color: $mdc-theme-background;
+}

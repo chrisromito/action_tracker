@@ -1,0 +1,23 @@
+
+// Generic % based width & height
+@for $n from 1 through 20 {
+    $val: $n * 5;
+    $dimension: percentage($val / 100);
+
+    .width--#{$val} {
+        width: #{$dimension};
+        max-width: #{$dimension};
+    }
+    .height--#{$val} {
+        height: #{$dimension};
+        max-height: #{$dimension};
+    }
+}
+
+
+
+//-- Media queries
+
+$desktop: 840px;
+$tablet: 480px;
+$phone: 0px;

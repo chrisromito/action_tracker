@@ -1,0 +1,101 @@
+@import "../styles/index";
+
+
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: $mdc-theme-background;
+    display: flex;
+    height: 100vh;
+}
+
+.mdc-drawer-app-content {
+    flex: auto;
+    overflow: auto;
+    position: relative;
+}
+
+.main-content {
+    overflow: auto;
+    height: 100%;
+}
+
+.app-bar {
+    position: absolute;
+}
+
+// .mdc-top-app-bar {
+//     z-index: 7;
+// }
+
+.mdc-drawer {
+    z-index: 7;
+}
+
+
+.app--body { overflow: hidden; }
+
+
+//-- Chart Styles
+//*============================================*//
+.chart--container {
+    margin: 20px auto;
+}
+
+.chartist-tooltip {
+    position: absolute;
+    font-size: 12px;
+    color: white;
+    background: transparent;
+
+    .chartist-tooltip-value {
+        display: block;
+        width: auto;
+        height: auto;
+    }
+
+    .chart--tooltip-body {
+        padding: 12px;
+        background: #232F34;
+    }
+}
+
+//-- Axis labels
+.ct-axis-title {
+    color: $text-on-dark;
+    fill: $text-on-dark;
+}
+
+//-- Points along the line graph
+.point--custom.ct-area {
+    fill-opacity: 0.9;
+}
+
+
+//-- MDC Libs
+
+@import "material-components-web/material-components-web";
+@import "@material/menu-surface/mdc-menu-surface";
+@import "@material/menu/mdc-menu";
+@import "@material/select/mdc-select";
+
+
+//-- FAB Styles - position the FAB in the bottom-right corner
+.mdc-fab {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+}
+
+
+@media(min-width: 1024px) {
+    .mdc-fab {
+        bottom: 1.5rem;
+        right: 1.5rem;
+    }
+}
+
+

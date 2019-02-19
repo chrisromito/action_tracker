@@ -1,0 +1,40 @@
+$primary: #37474f;
+$primary-light: #62727b;
+$primary-dark: #102027;
+
+$secondary:#dd2c00;
+$secondary-light: #ff6434;
+$secondary-dark: #a30000;
+
+$mdc-theme-primary: $primary;
+$mdc-theme-secondary: $secondary;
+$mdc-theme-background: #f1f1f1;
+$mdc-theme-surface: #f5f5f6;
+
+$text-on-dark: #fbfbfb;
+$text-on-primary: #fbfbfb;
+$text-on-secondary: #fbfbfb;
+
+$ct-series-colors: (
+    $secondary,
+    #d70206,
+    #f05b4f,
+    #f4c63d,
+    #d17905,
+    #453d3f,
+    #59922b,
+    #0544d3,
+    #6b0392,
+    #f05b4f,
+    #dda458,
+    #eacf7d,
+    #86797d,
+    #b2c326,
+    #6188e2,
+    #a748ca
+) !default;
+
+$ct-text-color: rgba($text-on-dark, 0.4);
+$ct-grid-color: rgba($text-on-dark, 0.15);
+
+

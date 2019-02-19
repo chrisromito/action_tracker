@@ -1,0 +1,47 @@
+// Helper classes for the 'display' property
+
+.block { display: block; }
+.inline-block { display: inline-block; }
+
+.i-flex {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.flex {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.nowrap, .flex.nowrap, .i-flex.nowrap {
+    flex-wrap: nowrap;
+}
+
+// Flex align/justify
+.flex--align-center, .ac { align-content: center; align-items: center; }
+.flex--justify-center, .jc { justify-content: center; justify-items: center; }
+
+.flex--align-start, .as {  align-content: flex-start; align-items: flex-start; }
+.flex--justify-start, .js { justify-content: flex-start; justify-items: flex-start; }
+
+
+.flex--align-end, .ae {  align-content: flex-end; align-items: flex-end; }
+.flex--justify-end, .je { justify-content: flex-end; justify-items: flex-end; }
+
+
+
+
+.rel {
+    position: relative;
+}
+
+
+.row {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: 100%;
+    overflow-x: hidden;
+    display: block;
+}
+

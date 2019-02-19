@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block body %}
+
+
+    <div class="mdc-card--container flex nowrap jc ac pad--v-10 pad--v-10 margin--auto">
+
+        <div class="output--card mdc-card">
+            <div class="mdc-card__primary-action pad--v-40 margin--v-20 pad--h-10 mdc-theme--background">
+                <div class="output--container">
+
+                    {# Container for our test output #}
+                    <div class="output"
+                            data-action="output">
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="mdc-card__actions">
+                {# Button to trigger the DOM Action test #}
+                <button class="mdc-button mdc-button--raised mdc-card__action mdc-card__action--button"
+                        data-action="trigger"
+                        id="test-dom-action-button"
+                        data-name="Test DOM Action Button">
+                    <span class="mdc-button__label">
+                        Trigger DOM Action
+                    </span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+
+
+
+
+
+    
+    {# Place Mac window here #}
+    <div class="osx--outer mdc-card"
+            style="display: none;">
+        
+        {# Top of the window (exit, minimize, fullscreen) #}
+        <div class="osx--topbar">
+            <div class="osx--btn-container flex nowrap jc ac pad--h-10">
+                {# Buttons #}
+                <div class="osx--btn osx--btn-close bg-red">
+                    <i class="mdi mdi-close"></i>
+                </div>
+                <div class="osx--btn osx--btn-min bg-yellow ">
+                    <i class="mdi mdi-minus"></i>
+                </div>
+                <div class="osx--btn osx--btn-full bg-green">
+                    <i class="mdi mdi-fullscreen"></i>
+                </div>
+            </div>
+            <div class="osx--topbar-title flex nowrap jc ac margin--auto pad--h-10">
+                <i class="mdi mdi-home"></i>
+                <span class="pad--h-5">
+                    Guest -- bash
+                </span>
+            </div>
+        </div>
+        {# Body of window #}
+        <div class="osx--body">
+            {# Content container #}
+            <div class="osx--content"
+                    data-action="container">
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+    {{ super() }}
+    <script async defer src="/client_tests.bundle.js"></script>
+
+{% endblock %}

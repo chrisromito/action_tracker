@@ -1,0 +1,82 @@
+<header id="app-bar" class="mdc-top-app-bar mdc-top-app-bar--short mdc-top-app-bar--short-collapsed">
+    <div class="mdc-top-app-bar__row">
+        {# Main Menu Icon/Button #}
+        <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+            <a href="#"
+                class="material-icons mdc-top-app-bar__navigation-icon">menu</a>
+        </section>
+    </div>
+</header>
+
+
+{# Side Nav Drawer #}
+<div class="mdc-drawer mdc-drawer--modal mdc-top--app-bar--fixed-adjust">
+    <div class="mdc-drawer__header">
+        <h3 class="mdc-drawer__title">
+            Chris Romito
+        </h3>
+    </div>
+    <div class="mdc-drawer__content">
+        <nav class="mdc-list">
+            {#-- Group 1: Internal Links #}
+            <a class="mdc-list-item mdc-list-item--activated"
+                href="/">
+                <i class="mdc-list-item__graphic mdi mdi-home"></i>
+                <span class="mdc-list-item__text">
+                    Home
+                </span>
+            </a>
+            <a class="mdc-list-item"
+                href="/project/">
+                <i class="mdc-list-item__graphic mdi mdi-folder-network"></i>
+                <span class="mdc-list-item__text">
+                    Portfolio
+                </span>
+            </a>
+        </nav>
+        <nav class="mdc-list mdc-list--two-line">
+            {#-- Group 2: Sub-apps --#}
+            <hr class="mdc-list-divider">
+            <a class="mdc-list-item"
+                    href="/apps/predictive-outcomes">
+                <i class="mdc-list-item__graphic mdi mdi-chart-line"></i>
+                <span class="mdc-list-item__text">
+                    <span class="mdc-list-item__primary-text">
+                        Predictive Outcomes
+                    </span>
+                    <span class="mdc-list-item__secondary-text">
+                        <i class="mdi mdi-delta"></i> Bodyweight <i class="mdi mdi-division"></i> Time
+                    </span>
+                </span>
+            </a>
+        </nav>
+        <nav class="mdc-list">
+            {#-- Group 3: External Links --#}
+            <hr class="mdc-list-divider">
+            <a class="mdc-list-item"
+                    href="mailto:chrisacreative@gmail.com"
+                    target="_blank">
+                <i class="mdc-list-item__graphic mdi mdi-email-outline"></i>
+                <span class="mdc-list-item__text">
+                    Contact
+                </span>
+            </a>
+            <a class="mdc-list-item"
+                href="https://github.com/NotMyRealNameHahaha"
+                target="_blank">
+                <i class="mdc-list-item__graphic mdi mdi-github-circle"></i>
+                <span class="mdc-list-item__text">
+                    Github - NotMyRealNamehahaha
+                </span>
+            </a>
+            <a class="mdc-list-item"
+                href="https://www.linkedin.com/in/chris-romito-93369a111/"
+                target="_blank">
+                <i class="mdc-list-item__graphic mdi mdi-linkedin-box"></i>
+                <span class="mdc-list-item__text">
+                    Linkedin
+                </span>
+            </a>
+        </nav>
+    </div>
+</div>
