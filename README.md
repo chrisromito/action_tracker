@@ -8,6 +8,9 @@ This provides a skeleton for you to build out a microservice/application capable
 ##### Clone it:
 `git clone https://github.com/NotMyRealNameHahaha/action_tracker.git && cd action_tracker`
 
+##### Install dependencies
+`npm install`
+
 ##### Run it
 `npm run dev`
 
