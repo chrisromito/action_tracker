@@ -1,8 +1,6 @@
 /**
  * @module interfaces/action.js - Provide a consistent interface/Object-representation of a 
  */
-
-
 const empty = {}
 
 
@@ -15,6 +13,19 @@ class Action {
         this.user = null
     }
 
+    static get [Symbol.species]() {
+        /**
+         * @static @method get [Symbol.species] - Helper method to distinguish
+         * between class instances
+         * @returns {this}
+         */
+        return this
+    }
+
+    _Cls() {
+        return this.constructor[Symbol.species]
+    }
+
     pushBreadCrumb(crumb) {
         this.breadCrumbs = this.breadCrumbs.concat(crumb)
         return this
@@ -23,22 +34,22 @@ class Action {
     toObject() {
         return {
             actionType: this.actionType,
-            target: !this.target ? {} : this.target,
+            target: this.target,
             breadCrumbs: this.breadCrumbs,
             user: this.user
         }
     }
 
     static of(action) {
+        const Cls = this.constructor[Symbol.species]
         return Object.assign(
             {},
-            new Action(action.actionType, action.target, action.breadCrumbs),
+            new Cls(action.actionType, action.target, action.breadCrumbs),
             action
         )
     }
 }
 
-exports.Action = Action
 
 
 /**
@@ -62,17 +73,47 @@ class EventAction extends Action {
         super(event.type, data || nodeAttrs(event.target))
     }
 
-    static of(event) {
-        return new EventAction(event)
+    static of(...args) {
+        const Cls = this.constructor[Symbol.species]
+        return new Cls(...args)
     }
 
-    lift(event) {
+    lift(...args) {
         /**
          * @method lift - Lift an Event into an existing EventAction,
          * and make the existing EventAction a breadcrumb in the new EventAction
          */
-        return this.of(event).pushBreadCrumb(this)
+        return this.of(...args).pushBreadCrumb(this.toObject())
     }
 }
 
-exports.EventAction = EventAction
+
+/**
+ * @class SearchAction - Interface for interacting w/
+ * Instances where a user entered a value into a search field
+ * 
+ */
+class SearchAction extends Action {
+    constructor(target, breadCrumbs=null) {
+        super('search', target, breadCrumbs)
+    }
+
+    fromEvent(event) {
+        const Cls = this.constructor[Symbol.species]
+        const nodeData = nodeAttrs(event.target)
+        const targetData = {
+            query: event.target.value.trim()
+        }
+        nodeData.data = Object.assign({}, nodeData.data, targetData)
+        return new Cls(nodeData)
+    }
+}
+
+
+
+
+module.exports = {
+    Action,
+    EventAction,
+    SearchAction
+}

@@ -38,5 +38,6 @@ module.exports = {
     Account: require('./account').Account,
     Action: require('./action').Action,
     IpLocation: require('./ip_location').IpLocation,
+    NeuralStep: require('./neural_step').NeuralStep,
     DB_URL
 }
