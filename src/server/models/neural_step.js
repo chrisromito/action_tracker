@@ -23,7 +23,7 @@ const NeuralStepSchema = new Schema({
     origin: {
         type: Schema.Types.ObjectId,
         required: false,
-        // Instead of a hardcoded model name in 'ref', 'refPath'
+        // Instead of a hard-coded model name in 'ref', 'refPath'
         // tells Mongoose to look at the 'originModel' property
         // to look up the right model
         refPath: 'originModel'

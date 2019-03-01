@@ -38,45 +38,6 @@ const Io = require('../../shared/functional_types/io')
 const { setSession } = require('./user.session')
 
 
-
-//-- User mutations
-// Set the 'active' field for this user
-// // userRight :: context a => Promise() => User
-// const userRight = (context)=> User.findOneAndUpdate(
-//     { id: getUserId(viewRequest(context)).value() },
-//     { active: true }
-// ).exec()
-
-
-// // Create a User
-// // userLeft :: => Promise() => User
-// const userLeft = (context)=> new User({ active: true}).save()
-
-
-// const updateUser = R.ifElse(
-//     R.compose(
-//         (m)=> m.isJust(),
-//         getUserId,
-//         viewRequest
-//     ),
-//     userRight,
-//     userLeft
-// )
-
-
-// // Set the user instance on the request session
-// const setUser = (context)=> updateUser(context)
-//     .then((user)=> {
-//         if (Maybe(user).isJust()) {
-//             const req = context.request
-//             req.session.user_id = user.id
-//             req.session.user = user
-//         }
-//         return context
-//     })
-
-
-
 /**
  * @constant onOpen :: context {socketContext} => Promise => UserSession {JSON}
  * NOTE: This can either be used when a socket connection is opened,

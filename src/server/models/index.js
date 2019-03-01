@@ -31,12 +31,14 @@ db.once('open', ()=> {
 
 
 //-- Now import & export our models
+const action = require('./action')
 
 module.exports = {
     User: require('./user').User,
     UserSession: require('./user.session').UserSession,
     Account: require('./account').Account,
-    Action: require('./action').Action,
+    Action: action.Action,
+    actionTypes: action.actionTypes,
     IpLocation: require('./ip_location').IpLocation,
     NeuralStep: require('./neural_step').NeuralStep,
     DB_URL

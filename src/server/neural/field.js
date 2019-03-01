@@ -8,6 +8,15 @@ const { Container, BaseApplicative } = require('../../shared/functional_types/ba
 
 
 
+const percentDifference = (a, b)=> Math.abs(a - b) / ((a + b) / 2)
+
+
+/**
+ * @const reduceToMap:: fn, arr => obj
+ * @param {Function} fn - function that returns an Array of [key, val] pairs for the Object
+ * @param {Object[]} arr - Array of values that we want to reduce into an Object (Map)
+ * @returns {Object}
+ */
 const reduceToMap = R.curry(
     (fn, arr)=> arr.reduce((accum, item, index)=> {
         const pair = fn(accum, item, index)
@@ -28,7 +37,8 @@ const serializeString = R.compose(
 
 const serializeValue = R.compose(
     R.clamp(0, 1),
-    Math.abs
+    Math.abs,
+    parseFloat
 )
 
 
@@ -42,16 +52,40 @@ const safeDate = (value)=> (
 
 
 /**
+ * @const relativeRelevance - Get the 'relative' relevance of each field
+ * Ie. If 'name' had a relevance score of 23%, and the 'last_modified' field
+ * was 10% relevant; how relevant was each field, relative to one another?
+ * 
+ * This gives us our 'output' field for Brain JS, since these are the values
+ * that we ultimately need to adjust for the "ideal search-relevance"
+ * 
+ * @param {Object} similarity - Object of relevance scores (Floats between 0-1)
+ * @returns {Object} Object w/ relativeRelevanceScores (also floats between 0-1)
+ */
+const relativeRelevance = (similarity)=> {
+    const total = R.sum(Object.values(similarity))
+    const percentRelevanceMap = Object.entries(similarity)
+        .reduce((accum, pair)=> {
+            const fieldName = pair[0]
+            const fieldSimilarity = pair[1]
+            accum[fieldName] = fieldSimilarity / total
+            return accum
+        }, {})
+    return percentRelevanceMap
+}
+
+
+/**
  * Fields
  *==============================*/
 
 class Field extends Container {
     constructor(lens) {
         /**
-         * @param {Function} lens - See Ramda.lens
+         * @param {Function} lens - @see Ramda.lens
          */
         super(lens)
-        this.lens = lens
+        this.lens = this.data
     }
 
     view(obj) {
@@ -103,6 +137,11 @@ class TextField extends Field {
         return serializeString(this.view(obj))
     }
 
+    compose(fn) {
+        return (obj)=> fn(
+            new TextField(this.lens).view(obj)
+        )
+    }
 
     similarity(query) {
         /**
@@ -117,11 +156,13 @@ class TextField extends Field {
         const serializedQuery = serializeString(query)
         const similarity = R.compose(
             serializeValue,
-            R.curry(stringSimilarity.compareTwoString)(serializedQuery),
+            // R.curry(stringSimilarity.compareTwoStrings)(serializedQuery),
+            (concreteField)=> stringSimilarity.compareTwoStrings(serializedQuery, concreteField),
             (obj)=> this.view(obj)
         )
 
-        return this.compose(similarity)
+        // return this.compose(similarity)
+        return similarity
     }
 }
 
@@ -145,7 +186,7 @@ class DateField extends Field {
         const dateAsNumber = safeDate(relative_date)
         const serializePred = R.compose(
             serializeValue,
-            (obj)=> dateAsNumber - this.serialize(obj)
+            (obj)=> percentDifference(dateAsNumber, this.serialize(obj))
         )
         return serializePred
     }
@@ -202,10 +243,9 @@ class FieldSpec {
     similarity(query_map, data) {
         /**
          * @method similarity :: d => l
-         * Get comparison values for a list of Objects 
-         * using this._spec as the 'spec' to compare the value
-         * of each Object's field property value to the respective
-         * query's property value
+         * Get comparison values for an Object's key/val pairs 
+         * using this._spec as the 'spec' to compare each of the Object's
+         * key/val pairs to their respective key/val pairs on the `data` object
          * 
          * @param {Object} query_map - Query data to compare each object to
          * @param {Object} data - Data to compare to the query data
@@ -225,10 +265,29 @@ class FieldSpec {
 
         return comparisonMap
     }
+
+    toPair(query_map, data) {
+        /**
+         * @method toPair - Get the relative relevance scores for `data`
+         * Calls `similarity` internally, so we can get the % similarity relative to the query data,
+         * then uses the % similarity (relevance) to get the relative relevance of each field
+         * 
+         * @param {Object} query_map
+         * @param {Object} data
+         * @returns {Object} - Object of floats between 0-1.  
+         */
+        const relevanceMap = this.similarity(query_map, data)
+        return {
+            input: relevanceMap,
+            output: relativeRelevance(relevanceMap)
+        }
+    }
 }
 
 
 module.exports = {
+    reduceToMap,
+    percentDifference,
     serializeString,
     serializeValue,
     Field,
