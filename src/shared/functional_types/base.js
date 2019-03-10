@@ -1,8 +1,71 @@
-const R = require('ramda');
-import * as Maybe from 'maybe';
+const R = require('ramda')
+const Maybe = require('maybe')
 
 
-export class BaseFunctor {
+class Container {
+    constructor(data) {
+        this.data = data
+    }
+
+    _Cls() {
+        return this.constructor[Symbol.species]
+    }
+
+    value() {
+        return this.data
+    }
+
+
+    static get [Symbol.species]() {
+        /**
+         * @static @method get [Symbol.species] - Helper method to distinguish
+         * between class instances
+         * @returns {this}
+         */
+        return this
+    }
+    
+    static of(data) {
+        /**
+         * @static @method of - Create a new Container w/ context
+         * @param {Object} data - Data/state for this Container
+         * @returns {Container[data]} - A new instance of this Container
+         * with the specified context
+         */
+        const Cls = this[Symbol.species]
+        return new Cls(data)
+    }
+
+    static lift(data) {
+        /**
+         * @static @method lift:: (o)=> A[o]
+         * Lift 'data' into a Container
+         * If it is already a Container, make it a new one (Immutability)
+         * Otherwise, return a Container w/ the context
+         * @param {(Object | A[Object])} data - Data/state for this Container
+         * @returns {A[Object]}
+         */
+        const Cls = this[Symbol.species]
+        const scope =  data instanceof Cls ? data.value() : data
+        return Cls.of(scope)
+    }
+
+    map(fn=R.identity) {
+        /**
+         * @method map:: (fn a => a)=> B[a] 
+         * Create a new Container, with the context being the
+         * current context after applying function `fn` to its data
+         * @param {Function} fn - The function to apply to this.data
+         * @returns {Container[data]}
+         */
+        return this._Cls().lift(
+            fn(this.value())
+        )
+    }
+}
+
+
+class BaseFunctor {
     constructor(...values) {
         /**
          * @param  {...any} values - Data/state for this functor
@@ -30,8 +93,9 @@ export class BaseFunctor {
          * @param {(...any | A[...any])} values - Data/state for this functor
          * @returns {A[...values]}
          */
-        const Cls = this.constructor[Symbol.species]
-        const scope =  values instanceof Cls ? values.values() : values
+        // const Cls = this.constructor[Symbol.species]
+        const Cls = this[Symbol.species]
+        const scope =  values instanceof Cls ? values.value() : values
         return Cls.of(scope)
     }
 
@@ -44,7 +108,11 @@ export class BaseFunctor {
         return this
     }
 
-    values() {
+    _Cls() {
+        return this.constructor[Symbol.species]
+    }
+
+    value() {
         return this._values
     }
 
@@ -56,24 +124,31 @@ export class BaseFunctor {
          * @param {Function} fn - The function to apply to this.values
          * @returns {BaseFunctor[...values]}
          */
-        const Cls = this.constructor[Symbol.species]
-        return new Cls(...this.values().map(fn))
+        const Cls = this._Cls()
+        return new Cls(...this.value().map(fn))
     }
 }
 
 
-export class BaseApplicative extends BaseFunctor {
+class BaseApplicative extends BaseFunctor {
     flatMap(fn=R.identity) {
-        const Cls = this.constructor[Symbol.species]
+        const Cls = this._Cls()
         // Flatten the result array & apply `fn` to all values
-        const result = [].concat.apply([], this.values().map(
+        const result = [].concat.apply([], this.value().map(
             R.ifElse(
                 (v)=> v instanceof Cls,
-                (v)=> v.values().map(fn),
+                (v)=> v.value().map(fn),
                 (v)=> fn(v)
             )
         ))
 
         return Cls.of(...result)
     }
+}
+
+
+module.exports = {
+    Container,
+    BaseFunctor,
+    BaseApplicative
 }

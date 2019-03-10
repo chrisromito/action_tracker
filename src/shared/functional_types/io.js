@@ -1,6 +1,7 @@
 
 const { identity } = require('ramda')
 
+
 class Io {
     constructor(fn=identity) {
         this.fn = fn

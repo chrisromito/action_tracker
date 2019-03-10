@@ -14,12 +14,12 @@ This provides a skeleton for you to build out an Express/Node/MongoDB microservi
 ## Run it
 `npm run dev`
 
-
 ## Check out the trivial example
 [http://0.0.0.0:8080/test]
 
 
 ## TODO
 - [x] Create in-app example page to see live demo.
-- [ ] Implement Search Relevance Neural Network
-    - WIP: See [https://github.com/NotMyRealNameHahaha/action_tracker/tree/feature/neural/search]
+- [x] Implement Search Relevance Neural Network.  Implement utilities to make it easier to build a Neural Network using 'Actions'.
+    - See 'src/server/neural'
+- [ ] Build example SPA for Neural Network implementation

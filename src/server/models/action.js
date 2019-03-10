@@ -4,10 +4,7 @@
  *  
  */
 
-// import { Schema, model } from 'mongoose';
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-const model = mongoose.model
+const { Schema, model } = require('mongoose')
 
 
 const ActionSchema = new Schema({
@@ -52,5 +49,28 @@ const ActionSchema = new Schema({
 	breadCrumbs: [Schema.Types.Mixed]
 })
 
+//-- Action Model
+const Action = model('Action', ActionSchema)
 
-exports.Action = model('Action', ActionSchema)
+
+//-- Basic Action types that can be referenced elsewhere
+// TODO (2019-Feb-27): Ensure this is used everywhere instead of hard-coded strings
+const actionTypes = {
+	//-- User Verbs
+	search: 'search',
+	searchSelection: 'search.select',
+	login: 'login',
+	logout: 'logout',
+	signUp: 'signup',
+	//-- HTTP Verbs
+	get: 'GET',
+	post: 'POST',
+	patch: 'PATCH',
+	delete: 'DELETE',
+}
+
+
+module.exports = {
+	Action,
+	actionTypes
+}
