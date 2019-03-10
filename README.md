@@ -1,4 +1,4 @@
-If existing services for analytics aren't quite cutting it, then you may be better off creating your own microservice/app.  This provides a skeleton for you to build out an app that does just that.  The app is built on top of Express/Node/MongoDB, and is capable of tracking actions performed by users and other applications.
+This provides a skeleton for you to build out an Express/Node/MongoDB microservice/application capable of tracking actions and events performed by users and other applications.
 
 ## Requirements:
 - Node >= 10.14.x
