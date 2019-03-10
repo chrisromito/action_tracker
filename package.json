@@ -18,7 +18,9 @@
         "client": "npm run watch",
         "start": "node src/server/index.js",
         "server": "nodemon src/server/index.js",
-        "dev": "concurrently \"npm run server\" \"npm run client\""
+        "dev": "concurrently \"npm run server\" \"npm run client\"",
+
+        "test_network": "node src/server/neural/test.action.search.js"
     },
     "keywords": [],
     "author": "",
@@ -36,7 +38,9 @@
         "@material/shape": "^0.41.0",
         "@material/textfield": "^0.41.0",
         "autoprefixer": "^9.3.1",
+        "babel-eslint": "^10.0.1",
         "babel-loader": "^8.0.4",
+        "babel-preset-airbnb": "^3.2.0",
         "bcrypt": "^3.0.4",
         "body-parser": "^1.18.3",
         "brain.js": "^1.6.1",
@@ -54,6 +58,11 @@
         "csv": "^5.0.0",
         "debug": "^4.1.0",
         "dev-server": "^0.1.0",
+        "eslint": "^5.15.0",
+        "eslint-config-airbnb": "^17.1.0",
+        "eslint-plugin-import": "^2.16.0",
+        "eslint-plugin-jsx-a11y": "^6.2.1",
+        "eslint-plugin-react": "^7.12.4",
         "express": "^4.16.4",
         "express-generator": "^4.16.0",
         "express-session": "^1.15.6",

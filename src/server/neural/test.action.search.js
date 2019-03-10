@@ -1,289 +1,71 @@
 /**
- * @TODO: (2019-Feb-28) Make this an actual test file instead of a scratch file. =D
- *    - Populate 'Action' model w/ test data that mocks a "User Search" feature
- *    - Assess if FieldSpec is a pain in the ass.  Would we be better off w/ an ActionFieldSpec type-of-deal?
- *    - Get metrics for efficiency & efficacy; adjust hidden layers accordingly.
+ * NOTE: This may take 5-10 minutes to run.
+ * 
+ * @TODO: (2019-Mar-09) - Get metrics for efficiency & efficacy; adjust default network config accordingly.
+ *                      - Implement unit tests
  */
-const moment = require('moment')
-const R = require('ramda')
-const Maybe = require('maybe')
-const { ActionInterface, SearchActionInterface } = require('../../shared/interfaces/index')
 const {
-    reduceToMap,
-    serializeString,
-    serializeValue,
-    Field,
     TextField,
     DateField,
-    FieldSpec
+    ActionFieldSpec
 } = require('./field')
-const { Action, NeuralStep } = require('../models/index')
-
-
-
-/**
- * Constants
- */
-const searchActionType = 'search'
-const selectedActionType = 'search.select'
+const { initUserSearchActions } = require('./test_data/user_generator')
+const { SearchModelActionTask } = require('./action.search')
 
 
 /**
- * Utils
+ * The `runTestTask` consists of 3 main steps:
+ * 
+ * 1. Our 'initUserSearchActions' function will generate test Users, Accounts, and random
+ * search actions to mock Users searching for other Users (eg. on a social media platform)
+ * 
+ * 2. Run the SearchActionTask using a FieldSpec based off of the User Model
+ * 3. The SearchActionTask trains a Recurrent Neural Network by comparing the search queries (generated in step 1),
+ * and stores the results in the 'NeuralStep' mongoBD document.
+ * 
+ * Optional Step
+ * 4. The If one were to run the `testTask` again, then it will run the training task again,
+ * but the network will "remember" where it left off from the last run
  */
-const toPlainObject = R.compose(JSON.parse, JSON.stringify)
 
-const searchActionFilter = R.filter(R.propEq('actionType', searchActionType))
-const selectedActionFilter = R.filter(R.propEq('actionType', selectedActionType))
-
-
-
-
-/**
- * FieldSpec for 'Songs' Network
- */
-const TestFieldSpec = new FieldSpec({
-    name: TextField.of(R.lensPath(['name'])),
-    timestamp: DateField.of(R.lensPath(['timestamp']))
+const UserFieldSpec = new ActionFieldSpec({
+    first_name: TextField.of('first_name'),
+    last_name: TextField.of('last_name'),
+    username: TextField.of('username'),
+    created: DateField.of('created')
 })
 
+const testTask = ()=> SearchModelActionTask('User', UserFieldSpec)
 
-// 'The Violent Sleep of Reason' release date in Milliseconds since Unix Epoch
-const releaseDate = moment().year(2016)
-    .month('October')
-    .date(7)
-    .valueOf()
-
-// Output Layer = testAlbum.songs
-const testAlbum = {
-    name: 'The Violent Sleep of Reason',
-    artist: 'Meshuggah',
-    released: releaseDate,
-    songs: [
-        'Clockworks',
-        'Born in Dissonance',
-        'MonstroCity',
-        'By the Ton',
-        'Violent Sleep of Reason',
-        'Ivory Tower',
-        'Stifled',
-        'Nostrum',
-        'Our Rage Won\'t Die',
-        'Into Decay'
-    ]
-}
-
-const randomIntBetween = (min, max)=> Math.floor(
-    Math.random() * (max - min)
-) + min
-
-
-const randomQueryString = (str)=> str.slice(0,
-    randomIntBetween(2, str.length)
-)
-
-
-const getTestActionPair = (album)=> {
-    const songs = R.prop('songs', album)
-    const index = randomIntBetween(0, songs.length)
-    const songName = R.prop(index, songs)
-
-    const searchAction = {
-        actionType: searchActionType,
-        breadCrumbs: [],
-        target: {
-            name: 'Song', // Fake model name
-            data: {
-                // Data from the search input element (see SearchActionInterface)
-                query: randomQueryString(songName),
-                name: 'song--search',  // Fake Element Name
-            }
-        }
-    }
-    
-    const selectedAction = {
-        actionType: selectedActionType,
-        breadCrumbs: [searchAction],
-        target: {
-            id: index,
-            name: 'Song', // Fake model name
-            data: {
-                // The action targeted this specific song...
-                id: index,
-                name: songName,
-                released: album.released
-            }
-        }
-    }
-
-    return [searchAction, selectedAction]
-}
-
-
-
-const saveTestData = ()=> {
-    console.log('\n\nsaveTestData \n--------------\n')
-
-    const data = R.range(0, 100).map(()=> getTestActionPair(testAlbum))
-
-    console.log(`\nSaving: ${JSON.stringify(data, null, 4)} \n\n\n`)
-
-    const flatData = R.flatten(data)
-
-    return Action.insertMany(flatData)
-        .then((new_actions)=> {
-            console.log('\nSuccessfully saved the test actions.')
-            return new_actions
-        })
-}
-
-
-const getTestData = ()=> Action.find({})
-    .or([
-        {actionType: searchActionType},
-        {actionType: selectedActionType}
-    ]).exec()
-
-
-
-
-
-/**
- * Search Action Neural Net Implementation
- *=====================================*/
-const nameLens = R.lensPath(['name'])
-const targetLens = R.lensPath(['target'])
-const dataLens = R.lensPath(['data'])
-const queryLens = R.compose(targetLens, dataLens, R.lensPath(['query']))
-const targetNameLens = R.compose(targetLens, dataLens, nameLens)
-
-
-const SearchActionToInput = (action)=> ({
-    name: R.view(queryLens, action),
-    timestamp: Date.now()
-})
-
-
-const SelectedActionToOutput = (action)=> ({
-    name: R.view(targetNameLens, action),
-    timestamp: R.view(
-        R.compose(targetLens, dataLens, R.lensPath(['released'])),
-        action
-    )
-})
-
-
-const serializeSongActions = (actions)=> selectedActionFilter(actions)
-    .reduce((accum, action)=> accum.concat({
-        query: SearchActionToInput(action.breadCrumbs[0]),
-        data: SelectedActionToOutput(action)
-    }), [])
-
-
-const getSerializedTestData = ()=> getTestData().then(serializeSongActions)
-
-const compareSerializedData = (serialized)=> TestFieldSpec.toPair(serialized.query, serialized.data)
-
-const getTestDataSimilarity = ()=> getSerializedTestData()
-    .then((actions)=> actions.map(compareSerializedData))
+const runTestTask = ()=> initUserSearchActions()
+    .then(testTask)
     .catch(console.log)
 
+runTestTask()
 
 
-const getStep = (step_arr)=> Maybe(step_arr.length ? step_arr[0] : null)
+//-- UnComment this to debug
+// module.exports = {
+//     testTask,
+//     runTestTask
+// }
 
 
-const getLastStep = (model_name)=> NeuralStep.find(
-    { originModel: model_name },
-    null,
-    { sort: {timestamp: -1} }
-).limit(1)
-    .exec()
-    .then(getStep)
+const _COPY_PASTE_INTO_NODE_SHELL_FOR_DEBUGGING = `
 
-
-const stepLeft = ()=> new brain.recurrent.RNNTimeStep()
-const stepRight = (mStep)=> {
-    const network = new brain.recurrent.RNNTimeStep()
-    network.fromJSON(
-        JSON.parse(R.prop('meta', mStep.value()))
-    )
-    return network
-}
-
-const stepToNetwork = (mStep)=> mStep.isJust() ? stepRight(mStep) : stepLeft()
-
-
-const trainModel = (model_name, brain_data)=> {
-    const mStep = getLastStep(model_name)
-}
-
-
-
-
-/**
- * @exports
- */
-
-module.exports = {
-    // Utils to use in the Node shell
-    R,
-    serializeString,
-    serializeValue,
-    Field,
-    TextField,
-    DateField,
-    FieldSpec,
-    testAlbum,
-    randomIntBetween,
-    randomQueryString,
-    searchActionFilter,
-    selectedActionFilter,
-
-    // Models & Actual test functions
-    Action,
-    getTestActionPair,
-    saveTestData,
-    getTestData,
-    SearchActionToInput,
-    SelectedActionToOutput,
-    serializeSongActions,
-    getSerializedTestData,
-    getTestDataSimilarity
-}
-
-
-const _COPY_PASTE = `
-
+var R = require('ramda')
+var { User, NeuralStep, Action, Account } = require('./src/server/models/index')
 var brain = require('brain.js')
 
 var actionSearch = {
-    R,
-    serializeString,
-    serializeValue,
-    Field,
-    TextField,
-    DateField,
-    FieldSpec,
-    testAlbum,
-    randomIntBetween,
-    randomQueryString,
-    searchActionFilter,
-    selectedActionFilter,
-    Action,
-    getTestActionPair,
-    saveTestData,
-    getTestData,
-    SearchActionToInput,
-    SelectedActionToOutput,
-    serializeSongActions,
-    getSerializedTestData,
-    getTestDataSimilarity
+    testTask,
+    runTestTask
 } = require('./src/server/neural/test.action.search')
 
 
-var testData = []
+var results = {}
 
-getTestDataSimilarity().then((d)=> testData = d)
+runTestTask().then((x)=> results = x).catch(console.log)
+
 
 `

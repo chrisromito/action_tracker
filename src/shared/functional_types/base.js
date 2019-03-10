@@ -42,11 +42,11 @@ class Container {
          * Lift 'data' into a Container
          * If it is already a Container, make it a new one (Immutability)
          * Otherwise, return a Container w/ the context
-         * @param {(Object | A[Object])} values - Data/state for this Container
+         * @param {(Object | A[Object])} data - Data/state for this Container
          * @returns {A[Object]}
          */
-        const Cls = this.constructor[Symbol.species]
-        const scope =  values instanceof Cls ? data.value() : data
+        const Cls = this[Symbol.species]
+        const scope =  data instanceof Cls ? data.value() : data
         return Cls.of(scope)
     }
 
@@ -58,8 +58,7 @@ class Container {
          * @param {Function} fn - The function to apply to this.data
          * @returns {Container[data]}
          */
-        const Cls = this._Cls()
-        return this.lift(
+        return this._Cls().lift(
             fn(this.value())
         )
     }
@@ -94,7 +93,8 @@ class BaseFunctor {
          * @param {(...any | A[...any])} values - Data/state for this functor
          * @returns {A[...values]}
          */
-        const Cls = this.constructor[Symbol.species]
+        // const Cls = this.constructor[Symbol.species]
+        const Cls = this[Symbol.species]
         const scope =  values instanceof Cls ? values.value() : values
         return Cls.of(scope)
     }

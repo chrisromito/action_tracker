@@ -1,5 +1,5 @@
 const R = require('ramda')
-const { Maybe, Either } = require('ramda-fantasy')
+const { Maybe } = require('ramda-fantasy')
 // Internal utils
 const Io = require('../../shared/functional_types/io')
 const { Container } = require('../../shared/functional_types/base')
@@ -11,15 +11,12 @@ const { FieldSpec } = require('./field')
 /**
  * Lenses & Utils
  */
-// const nameLens = R.lensPath(['name'])
-// const targetLens = R.lensPath(['target'])
-// const dataLens = R.lensPath(['data'])
-// const queryLens = R.compose(targetLens, dataLens, R.lensPath(['query']))
 const timeStampLens = R.lensPath(['timestamp'])
 
 const searchFromSelected = R.view(R.compose(
     R.lensPath(['breadCrumbs']),
-    R.lensIndex(0)
+    R.lensIndex(0),
+    R.lensPath(['target', 'data'])
 ))
 const selectedActionFilter = R.filter(R.propEq('actionType', actionTypes.searchSelection))
 
@@ -37,7 +34,7 @@ const getLatestActionId = R.compose(
  * Search Action Neural Net Implementation
  *=====================================*/
 
-
+// TODO: (CR 2019-Mar-09) Review this
 class NetworkContext extends Container  {
     constructor(data) {
         /**
@@ -50,28 +47,30 @@ class NetworkContext extends Container  {
     }
 
     extend(new_data) {
+        this.data = R.mergeDeepLeft(new_data, this.data)
         return this.map(R.mergeDeepLeft(new_data))
     }
 }
 
 
+
 class SearchRelevanceNetwork {
-    constructor(modelName, fieldSpec, context=null) {
+    constructor(modelName, fieldSpec, context=null, debug=true) {
         /**
          * @param {String} modelName
          * @param {FieldSpec} fieldSpec - What fields are we using to determine relevance?
          */
         this.modelName = modelName
         this.fieldSpec = fieldSpec
-        this._context = new NetworkContext(context || {})
+        this.context = new NetworkContext(context || {})
+        this.debug = debug
     }
 
-    get context() {
-        return this._context
-    }
-
-    set context(ctx) {
-        this._context = this._context.extend(ctx)
+    _logger(message) {
+        if (this.debug) {
+            console.log(`SearchRelevanceNetwork:`, message)
+        }
+        return message
     }
 
     getLastStep() {
@@ -86,8 +85,8 @@ class SearchRelevanceNetwork {
             .limit(1)
             .exec()
             .then((step)=> {
-                this.context = {step}
-                return step
+                this.context.step = step
+                return step[0] || null
             })
     }
 
@@ -105,21 +104,35 @@ class SearchRelevanceNetwork {
             data: network.forecast(),
             meta: JSON.stringify(network.toJSON())
         }).save().then((step)=> {
-            this.context = {step}
+            this.context.step = step
             return step
         })
     }
 
+    getConfig() {
+        return {
+            log: true,
+            iterations: 5000
+        }
+    }
+
     getNetwork(last_step=null) {
         const network = new brain.recurrent.RNNTimeStep()
-        const mStep = Maybe(step)
+        const mStep = Maybe(last_step)
         if (mStep.isJust) {
             // Help the network remember where it left off
             // by lifting the 'meta' property of the NeuralStep Object
-            const networkMemoryMeta = R.prop('meta', last_step)
-            network.fromJSON(JSON.parse(networkMemoryMeta))
+            const networkMemoryMeta = R.tryCatch(
+                R.pipe(R.prop('meta'), JSON.parse),
+                R.F
+            )(last_step)
+
+            if (networkMemoryMeta) {
+                console.log(`networkMemoryMeta: ${networkMemoryMeta}`)
+                network.fromJSON(networkMemoryMeta)
+            }
         }
-        this.context = { network }
+        this.context.network = network
         return network
     }
 
@@ -133,11 +146,12 @@ class SearchRelevanceNetwork {
         return Action.find(params)
             .where('target.name', this.modelName)
             .or([
-                {actionType: searchActionType},
-                {actionType: selectedActionType}
-            ]).exec()
+                {actionType: actionTypes.search},
+                {actionType: actionTypes.searchSelection}
+            ])
+            .exec()
             .then((actions)=> {
-                this.context = { actions }
+                this.context.actions = actions
                 return actions
             })
     }
@@ -156,42 +170,62 @@ class SearchRelevanceNetwork {
             .map((selectedActions)=> selectedActions.map(toPair))
             .run()
     }
+
+    train() {
+        return this.getLastStep()
+            .then((step)=> this.getActions(step))
+            .then((actions)=> {
+                const step = this.context.step
+                const network = this.getNetwork(step)
+
+                // Get the network training data & train it
+                const networkData = this.actionRelevance(actions)
+                const config = this.getConfig()
+
+                const start_time = Date.now()
+                this._logger(`Begin training session @ ${start_time}`)
+
+                network.train(networkData, config)
+
+                const end_time = Date.now()
+                this._logger(`End training session @ ${end_time}`)
+
+                // Save the step, then return our trainingContext
+                return this.saveStep(network, getLatestActionId(actions))
+                    .then(()=> ({
+                        results: network.forecast(),
+                        start: start_time,
+                        end: end_time,
+                        actions,
+                        networkData
+                    }))
+            })
+    }
 }
 
 
 /**
  * @const SearchModelActionTask - Task for Action Model Neural Network.
- * 1 - Looks for a recent NeuralStep for this model.
+ * 1. Looks for a recent NeuralStep for this model.
  *     NOTE: This step + the model name are used to get the Actions
- * 2 - Loads up a RNNTimeStep by either:
+ * 2. Loads up a RNNTimeStep by either:
  *     A. Creating a new RNNTimeStep network
  *     B. Loading the data from the last time this task ran & passing it into a RNNTimeStep instance
- * 3 - Gets all Actions w/ actionType === 'search.select' & target.name === `modelName`.
- * 4 - Gets the % relevance for all searches that have occurred since the last time this task ran successfully
- * 5 - Trains the RNNTimeStep
- * 6 - Creates a new `NeuralStep` using data from the network:
+ * 3. Gets all Actions w/ actionType === 'search.select' & target.name === `modelName`.
+ * 4. Gets the % relevance for all searches that have occurred since the last time this task ran successfully
+ * 5. Trains the RNNTimeStep
+ * 6. Creates a new `NeuralStep` using data from the network:
+ * 
+ * `NeuralStep`:
  *     @property {Object} meta: myRnnTimeStep.toJSON() gives us the ability to 'remember' training models.
  *     @property {Map} data: myRnnTimeStep.forecast() gives us the % relevance values for each field
  *     @property {Action} origin: The '_id' of the last `search.select` action in the data series.
  *     @property {String} originModel: 'Action'
  */
 const SearchModelActionTask = (modelName, fieldSpec)=> {
-    const actionSearch = SearchRelevanceNetwork(modelName, fieldSpec)
-    const lastStep = actionSearch.getLastStep()      // 1. Get our last step
+    const actionSearch = new SearchRelevanceNetwork(modelName, fieldSpec)
 
-    return lastStep.then(R.tap(
-        (step)=> actionSearch.getNetwork(step)       // 2. Get/Set the network
-    )).then((step)=> actionSearch.getActions(step))  // 3. Get/Set Actions
-    .then((actions)=> {
-        const network = lastStep.context.network
-        // 4 & 5. Get the relativeRelevance & train the network
-        network.train(
-            actionSearch.actionRelevance(lastStep.context.actions)
-        )
-
-        // 6. Store the network
-        actionSearch.saveStep(network, getLatestActionId(actions))
-    })
+    return actionSearch.train()
 }
 
 

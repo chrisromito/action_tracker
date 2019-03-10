@@ -31,7 +31,12 @@ const serializeString = R.compose(
     R.join(' '),
     R.map(stemmer),
     R.split(' '),
-    R.toLower
+    R.toLower,
+    R.ifElse(
+        R.complement(R.isNil),
+        R.identity,
+        R.always('')
+    )
 )
 
 
@@ -80,12 +85,15 @@ const relativeRelevance = (similarity)=> {
  *==============================*/
 
 class Field extends Container {
-    constructor(lens) {
+    constructor(path) {
         /**
-         * @param {Function} lens - @see Ramda.lens
+         * @param {String|String[]} path - Either the key name, or an array of key
+         * names that point to the data we want
          */
-        super(lens)
-        this.lens = this.data
+        super(path)
+        const lensPath = Array.isArray(path) ? path : [path]
+        this.lens = R.lensPath(lensPath)
+        this.path = path
     }
 
     view(obj) {
@@ -124,7 +132,36 @@ class Field extends Container {
     }
 
     similarity(query) {
-        return (obj)=> this.view(obj) === query ? 1 : 0
+        return (obj)=> {
+            try {
+                return this.view(obj) === query ? 1 : 0
+            } catch(err) {
+                this.catchError(err, {
+                    query: query,
+                    data: obj
+                })
+            }
+        }
+    }
+
+    catchError(err, data) {
+        /**
+         * @method catchError - Catches errors =)
+         * @param {Error} err
+         * @param {*} data
+         * @returns {Void}
+         */
+        const className = this.constructor[Symbol.species].name
+        console.error(`${className} caught an error ${err.name} @ line ${err.lineNumber} in ${err.fileName}:
+            ${err.message}
+            Stack trace: ${err.stack}
+        `)
+        console.error(`${className} error data:`)
+        const logData = R.tryCatch(
+            JSON.stringify,
+            R.identity
+        )(data)
+        console.error(logData)
     }
 }
 
@@ -143,6 +180,20 @@ class TextField extends Field {
         )
     }
 
+    view(obj) {
+        const result = super.view(obj)
+        if (!R.is(String, result)) {
+            const className = this.constructor[Symbol.species].name
+            const resultType = R.type(result)
+            throw new TypeError(
+            `${className}.view returned a value of type ${resultType} instead of a String.\n`+
+            `The path that was inspected: ${this.path}\n`+
+            `The object that threw this error: ${obj}`
+            )
+        }
+        return result
+    }
+
     similarity(query) {
         /**
          * @method similarity :: a {String}=> (obj) => {Number}
@@ -153,16 +204,22 @@ class TextField extends Field {
          * @param query {String}
          * @returns ({Object})=> {Number}
          */
-        const serializedQuery = serializeString(query)
-        const similarity = R.compose(
-            serializeValue,
-            // R.curry(stringSimilarity.compareTwoStrings)(serializedQuery),
-            (concreteField)=> stringSimilarity.compareTwoStrings(serializedQuery, concreteField),
-            (obj)=> this.view(obj)
-        )
+        try {
 
-        // return this.compose(similarity)
-        return similarity
+            const serializedQuery = serializeString(query)
+            const similarity = R.compose(
+                serializeValue,
+                // R.curry(stringSimilarity.compareTwoStrings)(serializedQuery),
+                (concreteField)=> stringSimilarity.compareTwoStrings(serializedQuery, concreteField),
+                (obj)=> this.view(obj)
+            )
+
+            // return this.compose(similarity)
+            return similarity
+        } catch(err) {
+            this.catchError(err, query)
+            throw err
+        }
     }
 }
 
@@ -285,6 +342,23 @@ class FieldSpec {
 }
 
 
+/**
+ * @class ActionFieldSpec - This extends FieldSpec, based on the assumption
+ * that this FieldSpec needs to inspect an `Action`'s `target.data` when
+ * comparing an Action to a Query
+ */
+class ActionFieldSpec extends FieldSpec {
+
+    toPair(query_map, data) {
+        const targetDataLens = R.lensPath(['target', 'data'])
+        return super.toPair(
+            query_map,
+            R.view(targetDataLens, data)
+        )
+    }
+}
+
+
 module.exports = {
     reduceToMap,
     percentDifference,
@@ -293,5 +367,6 @@ module.exports = {
     Field,
     TextField,
     DateField,
-    FieldSpec
+    FieldSpec,
+    ActionFieldSpec
 }
