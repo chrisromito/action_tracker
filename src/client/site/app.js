@@ -17,18 +17,24 @@ export const app = ()=> {
 
 if (mdc) {
     mdc.autoInit()
+    window._mdc = mdc
 } else {
     console.error('No MDC =(')
 }
 
 window.addEventListener('load', ()=> {
-    // Set up the drawer so we can attach it to the TopAppBar
-    const drawer = MDCDrawer.attachTo(document.querySelector('.mdc-drawer'))
-
     // Set up the top app bar
     const topAppBar = MDCTopAppBar.attachTo(
         document.querySelector('#app-bar')
     )
+
+    // Set up the drawer so we can attach it to the TopAppBar
+    const drawerElement = document.querySelector('.mdc-drawer')
+    if (!drawerElement.classList.contains('mdc-drawer--modal')) {
+        return false
+    }
+
+    const drawer = MDCDrawer.attachTo(drawerElement)
 
     topAppBar.listen('MDCTopAppBar:nav', ()=> {
         drawer.open = !drawer.open

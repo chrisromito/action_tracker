@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block nav %}
+    {% include 'page_view_demo/app_bar.html' %}
+{% endblock %}
+
+{% block body %}
+    {# Graph/Chart main div holds all the 'container' divs, which facilitates showing/hiding different charts based on the selected menu item in 'app_bar.html' #}
+    <div id="app" class="chart--main width--95 flex nowrap jc ac pad--v-10 pad--v-10 margin--auto">
+        {# Real-time: Active user stream line chart #}
+        <div id="chart--real-time-container" class="chart--container chart--visible width--100">
+            <real-time></real-time>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+    {{ super() }}
+    <script async defer src="/page_view_demo.bundle.js"></script>
+
+{% endblock %}

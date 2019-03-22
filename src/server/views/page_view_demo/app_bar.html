@@ -1,0 +1,36 @@
+<header id="app-bar" class="mdc-top-app-bar">
+    <div class="mdc-top-app-bar__row">
+        {# Main Menu Icon/Button #}
+        <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+            <a href="#"
+                class="material-icons mdc-top-app-bar__navigation-icon">menu</a>
+        </section>
+    </div>
+</header>
+
+
+{# Side Nav Drawer #}
+<div class="mdc-drawer mdc-top-app-bar--fixed-adjust">
+    <div class="mdc-drawer__content">
+        <nav class="mdc-list">
+            {#-- Group 1: Internal Links #}
+            <a class="mdc-list-item mdc-list-item--activated"
+                    href="/">
+                <i class="mdc-list-item__graphic mdi mdi-home"></i>
+                <span class="mdc-list-item__text">
+                    Home
+                </span>
+            </a>
+            
+            {#-- Group 2: Charts --#}
+            <hr class="mdc-list-divider">
+            <a class="mdc-list-item"
+                    href="#realtime--chart">
+                <i class="mdc-list-item__graphic mdi mdi-chart-timeline"></i>
+                <span class="mdc-list-item__text">
+                    Real-Time
+                </span>
+            </a>
+        </nav>
+    </div>
+</div>

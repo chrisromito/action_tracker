@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block body %}
+    <div class="mdc-card--container flex nowrap jc ac pad--v-10 pad--v-10 margin--auto">
+        <div class="signup--card mdc-card">
+            <div class="mdc-card__primary-action pad--v-40 margin--v-20 pad--h-10">
+                <form class="signup--form" type="POST">
+                    {# First Name #}
+                    <div class="mdc-text-field">
+                        <input id="first_name" name="first_name" type="type" class="mdc-text-field__input" required minlength=2>
+                        <label for="first_name" class="mdc-floating-label">First name</label>
+                        <div class="mdc-line-ripple"></div>
+                    </div>
+
+                    {# Last Name #}
+                    <div class="mdc-text-field">
+                        <input id="last_name" name="last_name" type="type" class="mdc-text-field__input" required minlength=2>
+                        <label for="last_name" class="mdc-floating-label">Last name</label>
+                        <div class="mdc-line-ripple"></div>
+                    </div>
+
+                    {# Email #}
+                    <div class="mdc-text-field">
+                        <input id="username" name="username" type="email" class="mdc-text-field__input" required minlength=6>
+                        <label for="username" class="mdc-floating-label">Email/Username</label>
+                        <div class="mdc-line-ripple"></div>
+                    </div>
+                    <div class="mdc-text-field-helper-line">
+                        <div class="mdc-text-field-helper-text">Usernames must be valid email addresses and > 5 characters in length</div>
+                    </div>
+
+                    {# Password 1 #}
+                    <div class="mdc-text-field">
+                        <input id="password1" name="password1" type="password" class="mdc-text-field__input" required minlength=6>
+                        <label for="password1" class="mdc-floating-label">Password</label>
+                        <div class="mdc-line-ripple"></div>
+                    </div>
+                    <div class="mdc-text-field-helper-line">
+                        <div class="mdc-text-field-helper-text">Passwords must be at least 6 characters</div>
+                    </div>
+
+                    {# Password 2 #}
+                    <div class="mdc-text-field">
+                        <input id="password2" name="password2" type="password" class="mdc-text-field__input" required minlength=6>
+                        <label for="password2" class="mdc-floating-label">Re-Enter Password</label>
+                        <div class="mdc-line-ripple"></div>
+                    </div>
+                    <div class="mdc-text-field-helper-line">
+                        <div class="mdc-text-field-helper-text">Passwords must be at least 6 characters</div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="mdc-card__actions">
+                {# Button to trigger the DOM Action test #}
+                <button class="mdc-button mdc-button--raised mdc-card__action mdc-card__action--button"
+                        data-action="trigger"
+                        id="test-dom-action-button"
+                        data-name="Test DOM Action Button">
+                    <span class="mdc-button__label">
+                        Trigger DOM Action
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+    {{ super() }}
+    <script async defer src="/client_tests.bundle.js"></script>
+
+{% endblock %}

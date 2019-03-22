@@ -1,4 +1,5 @@
-// import { StringSearch } from './utils.str.search.js';
+import * as R from 'ramda';
+
 
 // Utils
 /*  One-liners
@@ -173,6 +174,50 @@ export function getOffset(el) {
     }
 }
 
+
+//-- CSS Classes
+export const addClass = R.curry((cls, node)=> {
+    node.classList.add(cls)
+    return node
+})
+
+export const removeClass = R.curry((cls, node)=> {
+    node.classList.remove(cls)
+    return node
+})
+
+export const hasClass = R.curry((cls, node)=> node.classList.contains(cls))
+
+export const toggleClass = R.curry((cls, node)=> hasClass(cls, node) ? removeClass(cls, node) : addClass(cls, node))
+
+//-- Attrs
+export const getAttr = R.curry((attr, node)=> node.getAttribute(attr))
+
+export const setAttr = R.curry((attr, value, node)=> node.setAttribute(attr, value))
+
+
+//-- dataSet
+const dataSetLens = R.lensPath(['dataset'])
+
+const dataAttrLens = (attr)=> R.compose(dataSetLens, R.lensPath([attr]))
+
+export const getData = R.curry((attr, node)=> R.view(dataAttrLens(attr), node))
+
+export const setData = R.curry((attr, value, node)=> {
+    node.dataset[attr] = value
+    return node
+})
+
+//-- Traversal
+export const parent = (el)=> el.parentElement
+
+export const child = cEl
+
+export const children = cEls
+
+export const remove = R.tap((el)=> el.remove())
+
+
 //-- Pure DOM helpers
 export function Dom(el) {
     if (isString(el)) {
@@ -190,17 +235,15 @@ export function Dom(el) {
         },
 
         addClass: function(cls) {
-            el.classList.add(cls);
-            return el;
+            return addClass(cls, el);
         },
 
         removeClass: function(cls) {
-            el.classList.remove(cls);
-            return el;
+            return removeClass(cls, el);
         },
 
         hasClass: function(cls) {
-            return Boolean(el.classList.contains(cls));
+            return hasClass(cls, el);
         },
 
         parentHasClass: function (_class) {

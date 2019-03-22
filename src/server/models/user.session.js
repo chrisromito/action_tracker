@@ -16,6 +16,8 @@ const UserSessionSchema = new Schema({
 		required: true
 	},
 
+	sessionId: String,
+
 	// Is this the currently active session?
 	active: {
 		type: Boolean,
@@ -36,11 +38,5 @@ const UserSessionSchema = new Schema({
 	updated: defaultDate,
 	created: defaultDate
 })
-
-
-// UserSessionSchema.pre('save', function(next) {
-//     this.updated = Date.now()
-//     return next(this)
-// })
 
 exports.UserSession = model('UserSession', UserSessionSchema)

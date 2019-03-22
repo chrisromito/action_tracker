@@ -20,7 +20,8 @@ body {
 
 .main-content {
     overflow: auto;
-    height: 100%;
+    // height: 100%;
+    height: auto;
 }
 
 .app-bar {
@@ -45,34 +46,34 @@ body {
     margin: 20px auto;
 }
 
-.chartist-tooltip {
-    position: absolute;
-    font-size: 12px;
-    color: white;
-    background: transparent;
+// .chartist-tooltip {
+//     position: absolute;
+//     font-size: 12px;
+//     color: white;
+//     background: transparent;
 
-    .chartist-tooltip-value {
-        display: block;
-        width: auto;
-        height: auto;
-    }
+//     .chartist-tooltip-value {
+//         display: block;
+//         width: auto;
+//         height: auto;
+//     }
 
-    .chart--tooltip-body {
-        padding: 12px;
-        background: #232F34;
-    }
-}
+//     .chart--tooltip-body {
+//         padding: 12px;
+//         background: #232F34;
+//     }
+// }
 
-//-- Axis labels
-.ct-axis-title {
-    color: $text-on-dark;
-    fill: $text-on-dark;
-}
+// //-- Axis labels
+// .ct-axis-title {
+//     color: $text-on-dark;
+//     fill: $text-on-dark;
+// }
 
-//-- Points along the line graph
-.point--custom.ct-area {
-    fill-opacity: 0.9;
-}
+// //-- Points along the line graph
+// .point--custom.ct-area {
+//     fill-opacity: 0.9;
+// }
 
 
 //-- MDC Libs

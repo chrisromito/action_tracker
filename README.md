@@ -22,4 +22,19 @@ If existing services for analytics aren't quite cutting it, then you may be bett
 - [x] Create in-app example page to see live demo.
 - [x] Implement Search Relevance Neural Network.  Implement utilities to make it easier to build a Neural Network using 'Actions'.
     - See 'src/server/neural'
-- [ ] Build example SPA for Neural Network implementation
+- [x] Implement data model for page views
+- [ ] Build example page view & action graphs
+    [ ] - Real-time Activity
+        [ ] - HTML Markup
+        [ ] - JS implementation
+        [ ] - Polish UI
+    
+    [ ] - Active user (time-series)
+        [ ] - HTML Markup
+        [ ] - JS implementation
+        [ ] - Polish UI
+
+    [ ] - Page Activity (Sankey diagram)
+        [ ] - HTML Markup
+        [ ] - JS implementation
+        [ ] - Polish UI

@@ -1,0 +1,71 @@
+@import '../styles/colors';
+
+.mdc-top-app-bar {
+    z-index: 7;
+}
+
+
+// $hiddenTransform: translate(25%, 0);
+// $visibleTransform: translate(0, 0);
+// $animationDuration: 5000ms;
+
+
+// @keyframes slidein {
+//     from {
+//         transform: $hiddenTransform;
+//     }
+
+//     to {
+//         transform: $visibleTransform;
+//     }
+// }
+
+
+.ct-series-a {
+    // animation: slidein $animationDuration 1s ease both;
+}
+
+
+//-- Chart Styles
+//*============================================*//
+.chart--container {
+    margin: 20px auto 0 auto;
+}
+
+.chartist-tooltip {
+    position: absolute;
+    font-size: 12px;
+    color: $primary-dark;
+    background: transparent;
+
+    .chartist-tooltip-value {
+        display: block;
+        width: auto;
+        height: auto;
+    }
+
+    .chart--tooltip-body {
+        padding: 12px;
+        background: $primary-dark;
+    }
+}
+
+//-- Axis labels
+.ct-axis-title {
+    color: $primary-dark;
+    fill: $primary-dark;
+}
+
+//-- Points along the line graph
+.point--custom.ct-area {
+    fill-opacity: 0.9;
+}
+
+
+// // Provide defaults for chartist to work with
+$ct-text-color: rgba($primary-dark, 0.4);
+$ct-grid-color: rgba($primary-dark, 0.15);
+
+
+
+@import 'chartist/dist/scss/chartist.scss';

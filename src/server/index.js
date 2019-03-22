@@ -58,6 +58,8 @@ app.use(csrf({
 }))
 
 
+
+
 const sessionStore = new MongoDBStore({
     uri: DB_URL,
     collection: 'sessions'
@@ -82,11 +84,17 @@ app.use(session({
 // If a user's cookie is still saved in browser, but user
 // is not set, then log them out
 app.use((req, res, next)=> {
-    if (req.cookies['connect.sid'] && !res.session.user) {
+    if (req.cookies['connect.sid'] && (!req.session || !req.session.user)) {
         return res.clearCookie('connect.sid')
     }
     next()
 })
+
+
+// //-- User/Session middleware
+// const loginMiddleware = require('./middleware/login')
+
+// app.use(loginMiddleware())
 
 
 // Add csrfToken to the nunjucks context
@@ -96,26 +104,16 @@ app.use((req, res, next)=> {
 })
 
 
+
 /**  Routes 
  *==============================*/
 app.use('/', routes.router)
 app.use('/', routes.ActionRouter)
 app.use('/', routes.UserRouter)
+app.use('/', routes.PageViewRouter)
 
 
 app.set('view engine', 'html')
-
-/**  GraphQL
- *==============================*/
-// app.use(
-//     '/graphql',
-//     cors(),
-//     bodyParser.json(),
-//     expressGraphQL({
-//         schema: schema,
-//         graphiql: true
-//     })
-// )
 
 const port = process.env.PORT
 

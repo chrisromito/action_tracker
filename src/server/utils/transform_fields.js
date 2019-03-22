@@ -1,11 +1,13 @@
-/** @moduel transform_fields : Provides helper functions to deal
+/**
+ * @module transform_fields : Provides helper functions to deal
  * with transforming Mongoose fields
  */
 
 const R = require('ramda')
 
 
-/** @constant transformDecimalField:: obj {Object}=> d {Float}
+/**
+ * @constant transformDecimalField:: obj {Object}=> d {Float}
  *  Transforms a '$numberDecimal' object to its underlying float
  * 
  * @param {Object} obj The object associated w/ the field value
@@ -40,16 +42,19 @@ const getId = R.prop('_id')
 const setId = (o)=> R.set(idLens, getId(o), o)
 
 
-/** @typedef {Object} Model
+/**
+ * @typedef {Object} Model
  * @property {String} id
  */
 
-/** @typedef {Function} curriedModel
+/**
+ * @typedef {Function} curriedModel
  * @param {Object} o The document object that we will transform
  * @returns {Model}
  */
 
-/** @function serializeModel:: (*=[])=> (o {Object})=> m
+/**
+ * @function serializeModel:: (*=[])=> (o {Object})=> m
  * Parse a model so it's suitable for a JSON response
  * This sets the 'id' property (obtained from o'_id')
  * & sets any decimal fields to their actual Numerical value
