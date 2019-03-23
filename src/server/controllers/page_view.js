@@ -36,8 +36,11 @@ const Io = require('../../shared/functional_types/io')
 const activeLens = R.lensPath(['active'])
 const activeFilter = (query)=> (obj)=> R.view(activeLens, query) ? R.over(
         activeLens,
-        R.equals('true'),
-        obj
+        R.either(
+            Boolean,
+            R.equals('true', R.__)
+        ),
+        query
     ) :
     obj
 
@@ -82,9 +85,8 @@ const PageViewCharts = (req, res)=> {
  * PageView REST API Controller methods
  */
 const PageViewList = (req, res)=> {
-    const queries = req.query
-    const filterObj = setPageViewFilters(queries, {}).run()
-    
+    const filterObj = setPageViewFilters(req.query, {}).run()
+
     return PageView.find(filterObj, null)
         .populate('children')
         .populate({

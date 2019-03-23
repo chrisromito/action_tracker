@@ -1,7 +1,8 @@
 import * as R from 'ramda'
-import { Maybe, Future } from 'ramda-fantasy'
-import { activeLens, activeFilter, userSessionLens, deltaSeconds } from '../../shared'
-import * as Io from '../../../shared/functional_types/io'
+import { Maybe } from 'ramda-fantasy'
+import { activeFilter, deltaSeconds } from '../../shared'
+import * as Io from '../../../../shared/functional_types/io'
+import { uuid } from '../../../common/utils'
 
 /**
  * @typedef PageView : An instance of a user viewing a page
@@ -20,7 +21,7 @@ const State = {
     pageViews: [],
     lastRequest: Date.now(),
     isLoading: false,
-    _requestFuture: null
+    _pvRequest: null
 }
 
 export const loadingLens = R.lensPath(['isLoading'])
@@ -37,6 +38,7 @@ const urlGroupsToPairs = R.compose(R.toPairs, groupByUrl)
 export const groupSpec = (data, url_data_pair)=> {
     const count = R.length(R.prop(1, url_data_pair))
     return {
+        uuid: uuid(),
         url: R.prop(0, url_data_pair),
         count: R.length(R.prop(1, url_data_pair)),
         percent: count / data.length
@@ -61,9 +63,7 @@ const activePerPage = (page_views)=> Io.lift(page_views)
 
 const Getters = {
     activePageViews: (state)=> {
-        return activeFilter(
-            R.view(pageViewLens, state)
-        )
+        return R.view(pageViewLens, state)
     },
 
     activePerPage: (state, getters)=> {
@@ -87,7 +87,7 @@ const Mutations = {
         /**
          * @method loading - Set `isLoading` on `state`
          * @param {Boolean} status
-         * @returns {Void}
+         * @returns {void}
          */
         state.isLoading = status
     },
@@ -101,9 +101,13 @@ const Mutations = {
          * @method setPageViews
          * @param {Object} state
          * @param {Object[]} page_views
-         * @returns {Void}
+         * @returns {void}
          */
         state.pageViews = page_views
+    },
+
+    setPvRequest: (state, fn)=> {
+        state._pvRequest = fn
     }
 }
 
@@ -111,15 +115,35 @@ const Mutations = {
 //-- Actions
 
 
-const getPageViews = ()=> fetch('')
-
+const getPageViews = ()=> fetch('/api/page_view/?active=true').then((pv)=> pv.json())
 
 const Actions = {
-     
     refresh({ commit, state}) {
         // Don't fire another request if we're still loading.
-        // just return the state 
+        // just return the state
+        const isLoading = state.loading
+        commit('loading', true)
+        commit('setLastRequest')
+
+        const fn = isLoading ? state._pvRequest : getPageViews()
+
+        commit('setPvRequest', fn)
+
+        fn.then((pv)=> {
+            // commit.setPageViews(pv)
+            // commit.loading(false)
+            commit('setPageViews', pv)
+            commit('loading', false)
+        })
     }
 }
 
+
+export default {
+    namespaced: true,
+    state: State,
+    getters: Getters,
+    actions: Actions,
+    mutations: Mutations
+}
 

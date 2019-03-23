@@ -17220,7 +17220,7 @@ function throttle(func, limit) {
    *        return console.log("throttling this console.log() statement");
    *    }, 1000));
    */
-  var inThrottle = undefined;
+  var inThrottle = false;
   var lastFunc = undefined;
   var throttleTimer = undefined;
   return function () {
@@ -17228,14 +17228,17 @@ function throttle(func, limit) {
     var args = arguments;
 
     if (inThrottle) {
-      clearTimeout(lastFunc);
+      clearTimeout(lastFunc); // noinspection JSValidateTypes
+
       return lastFunc = setTimeout(function () {
         func.apply(context, args);
         return inThrottle = false;
       }, limit);
     } else {
-      func.apply(context, args);
-      inThrottle = true;
+      func.apply(context, args); // noinspection JSValidateTypes
+
+      inThrottle = true; // noinspection JSValidateTypes
+
       return throttleTimer = setTimeout(function () {
         return inThrottle = false;
       }, limit);
@@ -17379,7 +17382,12 @@ var parent = function parent(el) {
   return el.parentElement;
 };
 var child = cEl;
-var children = cEls;
+var children = function children(qs) {
+  return function () {
+    var base_el = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+    return Array.from(cEls(qs)(base_el));
+  };
+};
 var remove = ramda__WEBPACK_IMPORTED_MODULE_0__["tap"](function (el) {
   return el.remove();
 }); //-- Pure DOM helpers
@@ -17471,7 +17479,6 @@ function Dom(el) {
     }
   };
 }
-;
 function Els(qs) {
   /* Utils for performing actions on node collections
    *  @param qs {String}: QuerySelector
@@ -17499,7 +17506,6 @@ function Els(qs) {
     }
   };
 }
-;
 /* Array Utils
 *============================*/
 

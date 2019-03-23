@@ -1,18 +1,19 @@
 import './app.scss'
 
-import Vue from 'vue';
+import Vue from 'vue'
 // App
-// import { AppStore } from './app.store';
+import store from './store'
 // import { ChartComponent, ChartTemplate } from '../outcomes_chart/chart.component';
 // import { PredictorsComponent, PredictorsTemplate } from '../predictors/predictors.component';
 
-import { RealTimeComponent } from './components/real_time/real_time.component';
-
+import { RealTimeChart } from './components/real_time/real_time.component'
+import { ActivePagesComponent } from './components/active_pages/active_pages.component'
 
 export const app = new Vue({
+    store,
     el:'#app',
-    // store: AppStore,
     components: {
-        'real-time': RealTimeComponent
+        'real-time': RealTimeChart,
+        'active-pages': ActivePagesComponent
     }
 })

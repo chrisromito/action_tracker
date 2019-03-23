@@ -3,3 +3,4 @@ node_modules
 *.log
 *.code-workspace
 **/.DS_Store
+.idea
