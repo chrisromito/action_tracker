@@ -8,9 +8,9 @@ import * as utils from '../../../common/utils'
 export const ActivePagesComponent = Vue.component('active-pages', {
     template: `
         <div id="ap--container" class="ap--table mdc-card margin--v-25">
-            <h3 class="mdc-typography--headline4 margin--15">
+            <h5 class="mdc-typography--headline5 margin--15">
                 Active Pages
-            </h3>
+            </h5>
             
             <div class="pad--15 ap--list mdc-list" ref="apList">
                 <!-- Faux Header -->

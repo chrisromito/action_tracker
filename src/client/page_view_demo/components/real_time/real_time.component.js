@@ -89,9 +89,9 @@ const defaultChartConfig = {
 export const RealTimeChart = Vue.component('real-time', {
     template: `
         <div id="chart--real-time" class="chart--real-time--card mdc-card">
-            <h3 class="mdc-typography--headline4 margin--15">
-                Active Users: <span class="mdc-typography--headline4">{{ totalActive }}</span>
-            </h3>
+            <h5 class="mdc-typography--headline5 margin--15">
+                Active Users: <span class="mdc-typography--headline5">{{ totalActive }}</span>
+            </h5>
             <div class="chart--real-time--chart-container pad--15">
                 <div ref="chartStream" class="chart--stream ct-chart ct-chart ct-golden-section"></div>
             </div>
@@ -100,9 +100,6 @@ export const RealTimeChart = Vue.component('real-time', {
 
     data: ()=> ({
         chart: '',
-
-        // chartData: R.dissoc('labels', testChartData()),
-        // chartData: testChartData(),
         chartData: {
             series: [[]]
         },
@@ -136,21 +133,21 @@ export const RealTimeChart = Vue.component('real-time', {
             this.redraw()
             // If our total is < 50; set the chart options' 'high' value to 50
             const total = this.totalActive
+            const options = Object.assign({}, defaultChartConfig, this.chartOptions)
             if (total < 25) {
-                this.chartOptions = Object.assign({}, this.chartOptions, {
+                this.chartOptions = Object.assign({}, options, {
                     high: 25
                 })
             } else {
-                this.chartOptions = Object.assign({}, this.chartOptions, defaultChartConfig)
+                this.chartOptions = R.dissoc('high', options)
             }
         },
     },
 
     mounted: function() {
         window._ChartComponent = this
-        utils.deferFn(()=> this.redraw())
 
-        // Watch the store real_time.pageViews
+        // Subscribe to changes to real_time.pageViews
         // When it changes, update our chartData so it is aware
         // of the number of active pageViews for each update
         this.$store.subscribe((mutation, state)=> {
@@ -158,17 +155,14 @@ export const RealTimeChart = Vue.component('real-time', {
                     return false
                 }
                 const scope = this
-                const pageViews = state.real_time.pageViews
-                const nodeX = Date.now()
                 const seriesPoints = scope.chartData.series[0].concat({
-                        x: nodeX,
-                        y: pageViews.length
+                        x: Date.now(),
+                        y: state.real_time.pageViews.length
                     }).slice(-10)
 
                 const newSeries = setMeta(seriesPoints)
 
                 scope.chartData = Object.assign({}, scope.chartData, {
-                    // labels: newSeries.map(displayTime),
                     series: [newSeries]
                 })
 

@@ -39164,7 +39164,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var ActivePagesComponent = vue__WEBPACK_IMPORTED_MODULE_2__["default"].component('active-pages', {
-  template: "\n        <div id=\"ap--container\" class=\"ap--table mdc-card margin--v-25\">\n            <h3 class=\"mdc-typography--headline4 margin--15\">\n                Active Pages\n            </h3>\n            \n            <div class=\"pad--15 ap--list mdc-list\" ref=\"apList\">\n                <!-- Faux Header -->\n                <div class=\"mdc-list-item\">\n                    <span class=\"ap--header mdc-list-item__text\">\n                        <div class=\"ap--header-first ap--cell\">\n                            Active Page\n                        </div>\n                        <div class=\"ap--header-second ap--cell\">\n                            Active Users\n                        </div>\n                    </span>\n                </div>\n                \n                <!-- List Out the Pages -->\n                <div v-for=\"(page, index) in activePerPage\"\n                        :key=\"page.uuid\"\n                        class=\"mdc-list-item\">\n                    <span class=\"ap--item mdc-list-item__text\">\n                        <div class=\"ap--index ap--cell\">\n                            {{ index + 1 }}.\n                        </div>\n                        <div class=\"ap--url ap--cell\">\n                            {{ page.url }}\n                        </div>\n                        <div class=\"ap--count ap--cell\">\n                            {{ page.count }}\n                        </div>\n                        <div class=\"ap--percent ap--cell\">\n                            {{ page.percent }}%\n                        </div>\n                    </span>\n                </div>\n            </div>\n        </div>\n    ",
+  template: "\n        <div id=\"ap--container\" class=\"ap--table mdc-card margin--v-25\">\n            <h5 class=\"mdc-typography--headline5 margin--15\">\n                Active Pages\n            </h5>\n            \n            <div class=\"pad--15 ap--list mdc-list\" ref=\"apList\">\n                <!-- Faux Header -->\n                <div class=\"mdc-list-item\">\n                    <span class=\"ap--header mdc-list-item__text\">\n                        <div class=\"ap--header-first ap--cell\">\n                            Active Page\n                        </div>\n                        <div class=\"ap--header-second ap--cell\">\n                            Active Users\n                        </div>\n                    </span>\n                </div>\n                \n                <!-- List Out the Pages -->\n                <div v-for=\"(page, index) in activePerPage\"\n                        :key=\"page.uuid\"\n                        class=\"mdc-list-item\">\n                    <span class=\"ap--item mdc-list-item__text\">\n                        <div class=\"ap--index ap--cell\">\n                            {{ index + 1 }}.\n                        </div>\n                        <div class=\"ap--url ap--cell\">\n                            {{ page.url }}\n                        </div>\n                        <div class=\"ap--count ap--cell\">\n                            {{ page.count }}\n                        </div>\n                        <div class=\"ap--percent ap--cell\">\n                            {{ page.percent }}%\n                        </div>\n                    </span>\n                </div>\n            </div>\n        </div>\n    ",
   computed: {
     activePerPage: function activePerPage() {
       return this.$store.getters['real_time/activePerPage'];
@@ -39309,12 +39309,10 @@ var defaultChartConfig = {
   })]
 };
 var RealTimeChart = vue__WEBPACK_IMPORTED_MODULE_6__["default"].component('real-time', {
-  template: "\n        <div id=\"chart--real-time\" class=\"chart--real-time--card mdc-card\">\n            <h3 class=\"mdc-typography--headline4 margin--15\">\n                Active Users: <span class=\"mdc-typography--headline4\">{{ totalActive }}</span>\n            </h3>\n            <div class=\"chart--real-time--chart-container pad--15\">\n                <div ref=\"chartStream\" class=\"chart--stream ct-chart ct-chart ct-golden-section\"></div>\n            </div>\n        </div>\n    ",
+  template: "\n        <div id=\"chart--real-time\" class=\"chart--real-time--card mdc-card\">\n            <h5 class=\"mdc-typography--headline5 margin--15\">\n                Active Users: <span class=\"mdc-typography--headline5\">{{ totalActive }}</span>\n            </h5>\n            <div class=\"chart--real-time--chart-container pad--15\">\n                <div ref=\"chartStream\" class=\"chart--stream ct-chart ct-chart ct-golden-section\"></div>\n            </div>\n        </div>\n    ",
   data: function data() {
     return {
       chart: '',
-      // chartData: R.dissoc('labels', testChartData()),
-      // chartData: testChartData(),
       chartData: {
         series: [[]]
       },
@@ -39343,23 +39341,21 @@ var RealTimeChart = vue__WEBPACK_IMPORTED_MODULE_6__["default"].component('real-
       this.redraw(); // If our total is < 50; set the chart options' 'high' value to 50
 
       var total = this.totalActive;
+      var options = Object.assign({}, defaultChartConfig, this.chartOptions);
 
       if (total < 25) {
-        this.chartOptions = Object.assign({}, this.chartOptions, {
+        this.chartOptions = Object.assign({}, options, {
           high: 25
         });
       } else {
-        this.chartOptions = Object.assign({}, this.chartOptions, defaultChartConfig);
+        this.chartOptions = ramda__WEBPACK_IMPORTED_MODULE_1__["dissoc"]('high', options);
       }
     }
   },
   mounted: function mounted() {
     var _this = this;
 
-    window._ChartComponent = this;
-    _common_utils__WEBPACK_IMPORTED_MODULE_7__["deferFn"](function () {
-      return _this.redraw();
-    }); // Watch the store real_time.pageViews
+    window._ChartComponent = this; // Subscribe to changes to real_time.pageViews
     // When it changes, update our chartData so it is aware
     // of the number of active pageViews for each update
 
@@ -39369,15 +39365,12 @@ var RealTimeChart = vue__WEBPACK_IMPORTED_MODULE_6__["default"].component('real-
       }
 
       var scope = _this;
-      var pageViews = state.real_time.pageViews;
-      var nodeX = Date.now();
       var seriesPoints = scope.chartData.series[0].concat({
-        x: nodeX,
-        y: pageViews.length
+        x: Date.now(),
+        y: state.real_time.pageViews.length
       }).slice(-10);
       var newSeries = setMeta(seriesPoints);
       scope.chartData = Object.assign({}, scope.chartData, {
-        // labels: newSeries.map(displayTime),
         series: [newSeries]
       });
       setTimeout(function () {

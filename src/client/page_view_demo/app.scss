@@ -5,27 +5,6 @@
 }
 
 
-// $hiddenTransform: translate(25%, 0);
-// $visibleTransform: translate(0, 0);
-// $animationDuration: 5000ms;
-
-
-// @keyframes slidein {
-//     from {
-//         transform: $hiddenTransform;
-//     }
-
-//     to {
-//         transform: $visibleTransform;
-//     }
-// }
-
-
-.ct-series-a {
-    // animation: slidein $animationDuration 1s ease both;
-}
-
-
 //-- Chart Styles
 //*============================================*//
 .chart--container {

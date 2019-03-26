@@ -82,7 +82,7 @@ const PageViewCharts = (req, res)=> {
 
 
 /**
- * PageView REST API Controller methods
+ * PageView REST(ish) API Controller methods
  */
 const PageViewList = (req, res)=> {
     const filterObj = setPageViewFilters(req.query, {}).run()
