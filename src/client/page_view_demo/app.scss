@@ -1,0 +1,50 @@
+@import '../styles/colors';
+
+.mdc-top-app-bar {
+    z-index: 7;
+}
+
+
+//-- Chart Styles
+//*============================================*//
+.chart--container {
+    margin: 20px auto 0 auto;
+}
+
+.chartist-tooltip {
+    position: absolute;
+    font-size: 12px;
+    color: $text-on-primary;
+    background: transparent;
+
+    .chartist-tooltip-value {
+        display: block;
+        width: auto;
+        height: auto;
+    }
+
+    .chart--tooltip-body {
+        padding: 12px;
+        background: $primary-dark;
+    }
+}
+
+//-- Axis labels
+.ct-axis-title {
+    color: $primary-dark;
+    fill: $primary-dark;
+}
+
+//-- Points along the line graph
+.point--custom.ct-area {
+    fill-opacity: 0.9;
+}
+
+
+// // Provide defaults for chartist to work with
+$ct-text-color: rgba($primary-dark, 0.4);
+$ct-grid-color: rgba($primary-dark, 0.15);
+
+
+
+@import 'chartist/dist/scss/chartist.scss';

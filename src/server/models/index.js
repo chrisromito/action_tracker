@@ -41,5 +41,6 @@ module.exports = {
     actionTypes: action.actionTypes,
     IpLocation: require('./ip_location').IpLocation,
     NeuralStep: require('./neural_step').NeuralStep,
+    PageView: require('./page_view').PageView,
     DB_URL
 }

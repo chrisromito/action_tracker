@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
+//-- Action Demo Page
 router.get('/test', (req, res)=> {
     console.log('Home page')
     const msg = 'Nunjucks message =D'
@@ -9,7 +10,14 @@ router.get('/test', (req, res)=> {
     })
 })
 
+//-- Popover Demo Page
+router.get('/popover', (req, res)=> res.render('popover.html'))
 
-module.exports.router = router
-module.exports.ActionRouter = require('./action')
-module.exports.UserRouter = require('./user')
+
+// App/API routers
+module.exports = {
+    router,
+    ActionRouter: require('./action'),
+    UserRouter: require('./user'),
+    PageViewRouter: require('./page_view')
+}

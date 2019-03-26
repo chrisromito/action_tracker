@@ -1,6 +1,8 @@
 // Provide helper classes for padding, margins, positioning, & alignment
 
+
 //-- Padding & margin helper classes
+.margin--auto { margin: auto; }
 
 @for $n from 0 through 10 {
     $size: $n * 5; // 0, 5, 10, 15, 20,... 50
@@ -48,7 +50,6 @@
 
 // Negation
 
-.margin--auto { margin: auto; }
 .margin--no-top { margin-top: 0; }
 .margin--no-right { margin-right: 0; }
 .margin--no-bottom { margin-bottom: 0; }

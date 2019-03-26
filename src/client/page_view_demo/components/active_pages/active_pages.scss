@@ -1,0 +1,42 @@
+@import '../../../styles/colors';
+
+
+.ap--list {
+    border-top: 1px solid rgba($primary-dark, 0.15);
+}
+
+.ap--table {
+
+    .ap--item, .ap--header {
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+        justify-items: flex-start;
+        align-content: flex-start;
+        align-items: flex-start;
+    }
+
+    .ap--header {
+        font-weight: bold;
+        border-bottom: 1px solid rgba($primary-dark, 0.15);
+    }
+
+    .ap--header-second, .ap--count, .ap--percent {
+        margin: auto 0;
+        align-self: flex-end;
+    }
+
+    .ap--cell {
+        max-width: 100%;
+    }
+
+    .ap--index, .ap--count, .ap--percent {
+        width: 50px;
+    }
+
+    .ap--url, .ap--header-first {
+        width: 150px;
+        margin-right: auto;
+    }
+
+}

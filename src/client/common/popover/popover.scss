@@ -1,0 +1,189 @@
+@import "../../styles/display";
+@import "../../styles/sizing";
+@import "../../styles/spacing";
+
+
+// Prefer transforms over modifying the 'display' attribute for a better mobile experience
+// Transforms allow the element to be rendered off-screen, so the browser doesn't have to
+// completely repaint the element & its neighbors when it's shown
+$hiddenTransform: translate(200vw, 0);
+$visibleTransform: translate(0, 0);
+$animationDuration: 250ms;
+
+$popover-border: 1px solid #ebedf2;
+
+
+
+@keyframes slidein {
+    from {
+        transform: $hiddenTransform;
+    }
+
+    to {
+        transform: $visibleTransform;
+    }
+}
+
+@keyframes grow {
+    from {
+        transform: scale(0, 0);
+    }
+    to {
+        transform: scale(1, 1);
+    }
+}
+
+
+
+
+.flex-attrs {
+    align-content: center;
+    align-items: center;
+    justify-content: flex-start;
+    justify-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.button-ripple {
+    height: calc(100% - 0.25rem);
+    left: 0;
+    right: 0;
+    border-radius: 50%;
+    position: absolute;
+    content: '';
+    background: rgba(0, 0, 0, 0.2);
+    animation-name: grow;
+    animation-timing-function: cubic-bezier(0, 0.5, 0.75, 0.95);
+}
+
+
+
+.cr-popover {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1.0rem;
+    background: white;
+
+    transition: transform $animationDuration;
+    transform: $hiddenTransform;
+    // animation-direction: reverse;
+    animation-name: slidein;
+    animation-timing-function: cubic-bezier(0, 0.5, 0.75, 0.95);
+    animation-duration: 250ms;
+
+    &.cr-popover--visible {
+        transform: $visibleTransform;
+        transition: transform $animationDuration;
+    }
+
+
+    .cr-popover--header,
+    .cr-popover--content,
+    .cr-popover--footer,
+    .cr-popover--loader {
+        @extend .flex-attrs;
+        width: 100%;
+    }
+
+    .cr-popover--container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-wrap: nowrap;
+        flex-direction: column;
+        position: relative;
+    }
+
+
+    // Popover header/title
+    .cr-popover--header {
+        @extend .flex-attrs;
+        width: 100%;
+        display: inline-flex;
+        border-bottom: $popover-border;
+        padding: 1.25rem 0;
+
+        // Back/dismiss button
+        .cr-popover--header-action {
+            // We're adding 0.5 rem to the font-size;
+            // Increase the bottom padding to balance out the height of this element with the size of the icon
+            // to keep the icon vertically centered
+            font-size: 1.75rem;
+            padding: 0 0.5rem 0.5rem 0.5rem;
+            position: relative;
+
+            &:hover {
+                &:before {
+                    @extend .button-ripple;
+                    animation-duration: 150ms;
+                }
+            }
+
+            &:active {
+                &:before {
+                    @extend .button-ripple;
+                    animation-duration: 200ms;
+                }
+            }
+
+            .la, .fa { font-size: inherit; }
+        }
+
+        // Title/Header
+        .cr-popover--header-title {
+            padding: 0 0.5rem;
+        }
+    }
+
+    // Content/Body
+    .cr-popover--body {
+        padding: 1.5rem 0 1.0rem 0;
+    }
+
+    // Loaders/spinners
+    .cr-popover--loader {
+        @extend .margin--auto;
+        display: block;
+        font-size: 10rem;
+        text-align: center;
+
+        &:first-child {
+            display: block;
+        }
+    }
+
+
+    // Footer/Actions
+    .cr-popover--footer {
+        border-top: $popover-border;
+        align-self: flex-end;
+        justify-self: flex-start;
+        margin: auto auto 0 auto;
+        padding: 1.25rem 0 0 0;
+    }
+}
+
+
+
+/**
+ * Optional CSS classes for extra flair
+ */
+
+.cr-popover--header-sticky {
+    // Make the header sticky so it sticks to the top of the popover
+    position: sticky;
+    top: 0;
+}
+
+
+.cr-popover--footer-sticky {
+    // Make the header sticky so it sticks to the top of the popover
+    position: sticky;
+    bottom: 0;
+}

@@ -1,12 +1,7 @@
 
 const Maybe = require('maybe')
 const R = require('ramda')
-const serializeModel = require('../utils/transform_fields').serializeModel
-const toPromise = require('../utils/to_promise').toPromise
-const _modelIndex = require('../models/index')
-const User = _modelIndex.User
-const UserSession = _modelIndex.UserSession
-const Action = _modelIndex.Action
+const { User, UserSession, Action } = require('../models/index');
 const {
     tryOrNull,
     viewRequest,
@@ -86,6 +81,7 @@ const sessionRight = (context)=> UserSession.findOneAndUpdate(
 // sessionLeft :: context a => Promise() => UserSession
 const sessionLeft = (context)=> new UserSession({
     user: getRequestUser(context),
+    session: context.request.session.id || null,
     active: true,
     ip_address: requestIp(viewRequest(context)),
     device: getDevice(viewRequest(context))
@@ -112,7 +108,10 @@ const hasSessionAndSessionId = R.allPass([
 // getOrCreateSession :: context a => Promise() => UserSession
 const getOrCreateSession = R.ifElse(
     R.compose(hasSessionAndSessionId, viewRequest),
-    sessionRight,
+    (context)=> R.tryCatch(
+        R.thunkify(sessionRight)(context),
+        R.thunkify(sessionLeft)(context)
+    )(context),
     sessionLeft
 )
 

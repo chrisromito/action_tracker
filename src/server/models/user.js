@@ -1,5 +1,4 @@
 const uuid = require('uuid/v4');
-// import * as mongoose from 'mongoose';
 const mongoose = require('mongoose')
 
 const defaultDate = {
@@ -37,12 +36,5 @@ const UserSchema = new mongoose.Schema({
 	updated: defaultDate,
 	created: defaultDate
 })
-
-
-// UserSchema.pre('save', function(next) {
-//     this.updated = Date.now()
-//     return next(this)
-// })
-
 
 exports.User = mongoose.model('User', UserSchema)

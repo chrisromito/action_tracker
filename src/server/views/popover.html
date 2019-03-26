@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block body %}
+
+
+    <div class="mdc-card--container flex nowrap jc ac pad--v-10 pad--v-10 margin--auto margin--v-40">
+        <div class="output--card mdc-card">
+            <div id="popover-parent" class="mdc-card__primary-action pad--v-40 margin--v-20 pad--h-10 mdc-theme--background">
+                {# Arbitrary Body Text #}
+                <section>
+                    <p>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris id odio vitae erat pharetra posuere tincidunt at elit. Integer imperdiet neque at purus aliquet maximus. Vestibulum auctor felis nec elit pharetra, sed mattis dolor ultricies. In nec placerat enim. Quisque aliquet leo in lacus ullamcorper, et mollis velit cursus. Aliquam rhoncus lacinia quam, sed euismod libero maximus id. In hac habitasse platea dictumst. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nullam maximus tempus felis. Morbi vel tincidunt arcu.
+
+                        Aliquam ac feugiat tortor. Curabitur porta accumsan tortor, in tincidunt ipsum lacinia ac. Etiam non lectus quis augue congue feugiat. Mauris luctus orci augue, vel congue nisl mattis sit amet. Morbi imperdiet congue sollicitudin. Nunc tortor urna, ultrices non suscipit vel, porttitor vitae dolor. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aenean efficitur sed purus ac elementum.
+                    </p>
+                </section>
+                <div class="cr-popover">
+                    <div class="cr-popover--container">
+                        {# Popover Header #}
+                        <div class="cr-popover--header">
+                            <div class="cr-popover--header-action"
+                                    data-action="close">
+                                <i class="la la-arrow-left"></i>
+                            </div>
+
+                            <div class="cr-popover--header-title">
+                                <h5 class="mdc-typography--headline5">
+                                    Test Popover
+                                </h5>
+                            </div>
+                        </div>
+                        
+                        <div class="cr-popover--body">
+                            Popover body text goes here.
+                        </div>
+
+                        {# Footer #}
+                        <div class="cr-popover--footer">
+                            <button class="mdc-button mdc-button--raised"
+                                    data-action="close"
+                                    data-component="popover">
+                                Close popover
+                            </button>
+                            <button class="mdc-button mdc-button--raised mdc-theme--primary-bg"
+                                    data-action="success"
+                                    data-component="popover">
+                                Save popover
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdc-card__actions">
+                {# Button to trigger the DOM Action test #}
+                <button id="popover--show"
+                        class="mdc-button mdc-button--raised mdc-card__action mdc-card__action--button"
+                        data-action="trigger"
+                        data-name="Show Popover">
+                    <span class="mdc-button__label">
+                        Show Popover
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    {#-- Loading PopOver --#}
+    <div id="loader--popover-parent" class="rel mdc-card--container flex nowrap jc ac pad--v-10 pad--v-10 margin--v-40">
+        <div class="output--card mdc-card">
+            <div class="mdc-card__primary-action pad--10 mdc-theme--background">
+                <h5 class="mdc-typography--headline5">
+                    Loader PopOver - Click to Show.  Click Again to hide.
+                </h5>
+                {# Arbitrary Body Text #}
+                <section>
+                    <p>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris id odio vitae erat pharetra posuere tincidunt at elit. Integer imperdiet neque at purus aliquet maximus. Vestibulum auctor felis nec elit pharetra, sed mattis dolor ultricies. In nec placerat enim. Quisque aliquet leo in lacus ullamcorper, et mollis velit cursus. Aliquam rhoncus lacinia quam, sed euismod libero maximus id. In hac habitasse platea dictumst. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nullam maximus tempus felis. Morbi vel tincidunt arcu.
+
+                        Aliquam ac feugiat tortor. Curabitur porta accumsan tortor, in tincidunt ipsum lacinia ac. Etiam non lectus quis augue congue feugiat. Mauris luctus orci augue, vel congue nisl mattis sit amet. Morbi imperdiet congue sollicitudin. Nunc tortor urna, ultrices non suscipit vel, porttitor vitae dolor. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aenean efficitur sed purus ac elementum.
+                    </p>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    {#-- Progress Bar PopOver --#}
+    <div id="progress--popover-parent" class="rel mdc-card--container flex nowrap jc ac pad--v-10 pad--v-10 margin--v-40">
+        <div class="output--card mdc-card">
+            <div class="mdc-card__primary-action pad--10 mdc-theme--background">
+                <h5 class="mdc-typography--headline5">
+                    Progress Bar PopOver - Click to Show.  Click Again to hide.
+                </h5>
+                {# Arbitrary Body Text #}
+                <section>
+                    <p>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris id odio vitae erat pharetra posuere tincidunt at elit. Integer imperdiet neque at purus aliquet maximus. Vestibulum auctor felis nec elit pharetra, sed mattis dolor ultricies. In nec placerat enim. Quisque aliquet leo in lacus ullamcorper, et mollis velit cursus. Aliquam rhoncus lacinia quam, sed euismod libero maximus id. In hac habitasse platea dictumst. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nullam maximus tempus felis. Morbi vel tincidunt arcu.
+
+                        Aliquam ac feugiat tortor. Curabitur porta accumsan tortor, in tincidunt ipsum lacinia ac. Etiam non lectus quis augue congue feugiat. Mauris luctus orci augue, vel congue nisl mattis sit amet. Morbi imperdiet congue sollicitudin. Nunc tortor urna, ultrices non suscipit vel, porttitor vitae dolor. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aenean efficitur sed purus ac elementum.
+                    </p>
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+    {{ super() }}
+    <script async defer src="/popover_tests.bundle.js"></script>
+
+{% endblock %}

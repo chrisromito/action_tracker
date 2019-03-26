@@ -54,13 +54,12 @@ module.exports = {
 
     //-- App entry-points (bundles)
     entry: {
+        // home: './src/client/home/app.js',
         site: './src/client/site/app.js',
         faux_style_bundle: './src/client/site/faux_style_bundle.js',
         client_tests: './src/client/client_tests/app.js',
-        // styles: './src/client/site/styles.scss',
-        // home: './src/client/home/app.js',
-        // project: './src/client/project/app.js',
-        // predictive_outcomes: './src/client/predictive_outcomes/app.js'
+        popover_tests: './src/client/popover_tests/app.js',
+        page_view_demo: './src/client/page_view_demo/app.js'
     },
 
     //-- Compilation destination resolution
@@ -82,6 +81,14 @@ module.exports = {
                         loader: 'css-loader',
                         options: {
                             importLoaders: 2
+                        }
+                    },
+                    {
+                        loader: 'postcss-loader',
+                        options: {
+                            plugins: ()=> [
+                                autoprefixer()
+                            ]
                         }
                     },
                     {
@@ -145,11 +152,12 @@ module.exports = {
         },
     },
 
-    // resolve: {
-    //     alias: {
-    //         'vue$': 'vue/dist/vue.esm.js'
-    //     },
-    //     extensions: ['.js']
-    // },
-    devtool: isDev ? 'cheap-module-eval-source-map' : 'source-map'
+    resolve: {
+        alias: {
+            'vue$': 'vue/dist/vue.esm.js'
+        },
+        extensions: ['.js']
+    },
+    // devtool: isDev ? 'cheap-module-eval-source-map' : 'source-map'
+    devtool: 'source-map'
 };

@@ -16,7 +16,10 @@ $text-on-primary: #fbfbfb;
 $text-on-secondary: #fbfbfb;
 
 $ct-series-colors: (
-    $secondary,
+    $secondary-light,
+    $primary-light,
+    $secondary-dark,
+    $primary-dark,
     #d70206,
     #f05b4f,
     #f4c63d,
@@ -34,7 +37,7 @@ $ct-series-colors: (
     #a748ca
 ) !default;
 
-$ct-text-color: rgba($text-on-dark, 0.4);
-$ct-grid-color: rgba($text-on-dark, 0.15);
+// $ct-text-color: rgba($text-on-dark, 0.4);
+// $ct-grid-color: rgba($text-on-dark, 0.15);
 
 

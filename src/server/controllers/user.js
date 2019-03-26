@@ -271,10 +271,17 @@ exports.userCreate = [
             last_name: body.last_name
         }).save()
             .then((acct)=> new User({ account: acct._id }).save())
-            .then((user)=> {
-                res.send(JSON.stringify(user))
-                next()
-            }).catch(next)
+            .then((user)=> new UserSession({ user: user, active: true }).save())
+            .then((user_session)=> {
+                res.session.id = user_session.id
+                res.session.session_id = user_session.id
+
+                const user = user_session.user
+                req.session.user_id = user.id
+                req.session.user = user
+                return user
+            }).then((user)=> next(res.send(JSON.stringify(user))))
+            .catch(next)
     }
 ]
 
