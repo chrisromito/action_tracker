@@ -16,16 +16,16 @@ const R = require('ramda')
 const Maybe = require('maybe')
 
 const { check, validationResult } = require('express-validator/check')
-const { serializeModel } = require('../utils/transform_fields')
+const { serializeModel } = require('../../utils/transform_fields')
 
 const {
     Account,
     Action,
     User,
     UserSession
-} = require('../models/index')
+} = require('../../models/index')
 
-const { UserInterface } = require('../../shared/interfaces/index')
+const { UserInterface } = require('../../../shared/interfaces/index')
 
 const { DateRangeFilter } = require('./common')
 
@@ -183,7 +183,7 @@ exports.userDelete = (req, res)=> {
  */
 exports.userLoginGet = (req, res)=> {
     const msg = 'userLoginGet - Nunjucks message =D'
-    return res.render('user/login.html', {
+    return res.render('account/login.html', {
         message: msg
     })
 }
@@ -224,7 +224,7 @@ exports.userLoginPost = [
  * @method userSignupGet : Display the signup page
  */
 exports.userSignupGet = (req, res)=> {
-    return res.render('user/signup.html', {
+    return res.render('account/signup.html', {
         // csrfToken: req.csrfToken(),
         errors: []
     })
@@ -234,7 +234,7 @@ exports.userSignupGet = (req, res)=> {
 /**
  * @method userCreate : Validate a POSTed user-form & create a User if everything is valid
  */
-exports.userCreate = [
+exports.userSignupPost = [
     // Form validation Checks
     check('password1').exists(),
     check('password2', 'Passwords must be equal')
@@ -270,17 +270,27 @@ exports.userCreate = [
             first_name: body.first_name,
             last_name: body.last_name
         }).save()
-            .then((acct)=> new User({ account: acct._id }).save())
-            .then((user)=> new UserSession({ user: user, active: true }).save())
-            .then((user_session)=> {
-                res.session.id = user_session.id
-                res.session.session_id = user_session.id
+            .then(
+                (acct)=> new User({ account: acct._id }).save()
+                    .then((user)=> new UserSession({ user: user._id, active: true }).save()
+                                        .then((user_session)=> [user, user_session]))
 
-                const user = user_session.user
+            )
+            .then(([user, user_session])=> {
+                console.log('Created user and UserSession')
+                console.log(`request session: ${req.session}`)
+                console.log(req.session)
+                req.session.id = user_session.id
+                req.session.session_id = user_session.id
+
                 req.session.user_id = user.id
                 req.session.user = user
+                console.log('created an account')
+                console.log(`User Session ID: ${user_session.id}`)
+                console.log(`User ID: ${user.id}`)
                 return user
-            }).then((user)=> next(res.send(JSON.stringify(user))))
+            // }).then((user)=> next(res.send(JSON.stringify(user))))
+            }).then((user)=> res.json(user))
             .catch(next)
     }
 ]

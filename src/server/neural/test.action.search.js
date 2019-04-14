@@ -1,8 +1,7 @@
 /**
  * NOTE: This may take 5-10 minutes to run.
  * 
- * @TODO: (2019-Mar-09) - Get metrics for efficiency & efficacy; adjust default network config accordingly.
- *                      - Implement unit tests
+ * @TODO: (2019-Mar-31) - Implement unit tests
  */
 const {
     TextField,
@@ -37,18 +36,16 @@ const UserFieldSpec = new ActionFieldSpec({
 
 const testTask = ()=> SearchModelActionTask('User', UserFieldSpec)
 
-const runTestTask = ()=> initUserSearchActions()
+const runTestTask = (n=250)=> initUserSearchActions(n)
     .then(testTask)
     .catch(console.log)
 
-runTestTask()
-
 
 //-- UnComment this to debug
-// module.exports = {
-//     testTask,
-//     runTestTask
-// }
+module.exports = {
+    testTask,
+    runTestTask
+}
 
 
 const _COPY_PASTE_INTO_NODE_SHELL_FOR_DEBUGGING = `
@@ -65,7 +62,12 @@ var actionSearch = {
 
 var results = {}
 
-runTestTask().then((x)=> results = x).catch(console.log)
+//-- Delete all users, actions, & accounts so we can start fresh.  Run the test task
+User.deleteMany({}).exec().
+    then(()=> Action.deleteMany({}).exec()).
+    then(()=> Account.deleteMany({}).exec()).
+    then(()=> runTestTask().then((x)=> results = x)).
+    catch(console.log)
 
 
 `

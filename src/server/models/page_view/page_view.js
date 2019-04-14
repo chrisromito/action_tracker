@@ -26,6 +26,12 @@ const PageViewSchema = new Schema({
         required: false
     },
 
+    page: {
+        ref: 'Page',
+        type: Schema.Types.ObjectId,
+        required: true
+    },
+
     parent: {
         ref: 'PageView',
         type: Schema.Types.ObjectId,

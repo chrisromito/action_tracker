@@ -2,8 +2,8 @@
 // import * as Maybe from 'maybe';
 const R = require('ramda')
 const Maybe = require('maybe')
-const { serializeModel } = require('../utils/transform_fields')
-const toPromise = require('../utils/to_promise').toPromise
+const { serializeModel } = require('../../utils/transform_fields')
+const toPromise = require('../../utils/to_promise').toPromise
 
 
 const {
@@ -19,23 +19,23 @@ const {
     getUserId,
     getRequestUser,
     DateRangeFilter
-} = require('./common')
+} = require('../common/common')
 
 const {
     Account,
     Action,
     User,
     UserSession
-} = require('../models/index')
+} = require('../../models/index')
 
 const {
     ActionInterface,
     EventActionInterface,
     UserInterface
-} = require('../../shared/interfaces/index')
-const Io = require('../../shared/functional_types/io')
+} = require('../../../shared/interfaces/index')
+const Io = require('../../../shared/functional_types/io')
 
-const { setSession } = require('./user.session')
+const { setSession } = require('../user/user.session')
 
 
 /**

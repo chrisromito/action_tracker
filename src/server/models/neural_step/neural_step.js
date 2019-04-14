@@ -36,14 +36,16 @@ const NeuralStepSchema = new Schema({
             // Models that Mongoose can look up
             'Action',
             'User',
-            'UserSession'
+            'UserSession',
+            'PageView'
         ]
     },
 
     //-- Neural meta data
     // Fields that were assessed
     fields: [String],
-    // Data: Assessment results
+    // Data: Assessment results - The weight of each field
+    // This is what we use to 'weigh' the significance of each field that was assessed
     data: {
         type: Map,
         of: Number
@@ -59,3 +61,52 @@ const NeuralStepSchema = new Schema({
 
 
 exports.NeuralStep = model('NeuralStep', NeuralStepSchema)
+
+
+/**
+ *
+ * @typedef NeuralStepMeta - Meta data created by brain.js for
+ * recurrent neural networks.  This is used to help a network 'remember'
+ * what it's done.  The meta data is stored on the 'meta' field on the NeuralStep model.
+ *
+ * @property {String} type: The type of neural network (we use Recurrent Neural Networks here)
+ * @property {Object} options: Options/settings/config for the network
+ * @property {Object[]} hiddenLayers: Hidden layer meta-data.  This is where most of the magic lives
+ * @property {Object} outputConnector:
+ * @property {Object} output
+ */
+
+
+/*
+
+Example 'meta' object:
+{
+    type: 'RNNTimeStep',
+    options: {
+        inputSize: 1,
+        hiddenLayers: [ 20 ],
+        outputSize: 1,
+        learningRate: undefined,
+        decayRate: 0.999,
+        smoothEps: 1e-8,
+        regc: 0.000001,
+        clipval: 5
+    },
+    hiddenLayers: [ { weight: [Object], transition: [Object], bias: [Object] } ],
+    outputConnector: {
+        rows: 1,
+        columns: 20,
+        weights: Float32Array [
+                 -0.041560377925634384,
+                -0.03150321915745735,
+                ...
+        ]
+    },
+    output: {
+        rows: 1,
+        columns: 1,
+        weights: Float32Array [ -0.02684454433619976 ]
+    }
+}
+
+*/

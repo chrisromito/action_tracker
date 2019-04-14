@@ -28361,8 +28361,7 @@ function () {
   function ActionSocket(socketConfig) {
     _classCallCheck(this, ActionSocket);
 
-    var config = ramda__WEBPACK_IMPORTED_MODULE_2__["mergeDeepRight"](defaultSocketConfig, socketConfig);
-    this.socketConfig = config;
+    this.socketConfig = ramda__WEBPACK_IMPORTED_MODULE_2__["mergeDeepRight"](defaultSocketConfig, socketConfig);
     this.socket = null; //webSocket(config.url)
 
     this.subscriberConfig = {}; // subscriberConfig

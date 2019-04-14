@@ -93,7 +93,7 @@ export const RealTimeChart = Vue.component('real-time', {
                 Active Users: <span class="mdc-typography--headline5">{{ totalActive }}</span>
             </h5>
             <div class="chart--real-time--chart-container pad--15">
-                <div ref="chartStream" class="chart--stream ct-chart ct-chart ct-golden-section"></div>
+                <div ref="chartStream" class="chart--stream ct-chart ct-chart ct-octave"></div>
             </div>
         </div>
     `,
@@ -119,9 +119,7 @@ export const RealTimeChart = Vue.component('real-time', {
                 R.view(countLens),
                 R.defaultTo(0)
             )
-            const total = getTotal(this.chartData)
-            console.log(`total: ${total}`)
-            return total
+            return getTotal(this.chartData)
         },
 
     },

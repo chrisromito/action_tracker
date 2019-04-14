@@ -12,26 +12,25 @@
 {# Side Nav Drawer #}
 <div class="mdc-drawer mdc-top-app-bar--fixed-adjust">
     <div class="mdc-drawer__content">
-        <nav class="mdc-list">
-            {#-- Group 1: Internal Links #}
-            <a class="mdc-list-item mdc-list-item--activated"
-                    href="/">
-                <i class="mdc-list-item__graphic mdi mdi-home"></i>
-                <span class="mdc-list-item__text">
-                    Home
-                </span>
-            </a>
-            
-            {#-- Group 2: Charts --#}
-            <hr class="mdc-list-divider">
+        <nav id="tab-nav" class="mdc-list">
+            {# Real Time #}
             <a class="mdc-list-item"
-                    href="#realtime--chart">
+                    href="#chart--real-time-container">
                 <i class="mdc-list-item__graphic mdi mdi-chart-timeline"></i>
                 <span class="mdc-list-item__text">
                     Real-Time
                 </span>
             </a>
+            <hr class="mdc-list-divider">
 
+            {# User Activity #}
+            <a class="mdc-list-item"
+                    href="#activity--chart-container">
+                <i class="mdc-list-item__graphic mdi mdi-chart-areaspline"></i>
+                <span class="mdc-list-item__text">
+                    Activity
+                </span>
+            </a>
         </nav>
     </div>
 </div>

@@ -1,7 +1,7 @@
 
 const Maybe = require('maybe')
 const R = require('ramda')
-const serializeModel = require('../utils/transform_fields').serializeModel
+const serializeModel = require('../../utils/transform_fields').serializeModel
 
 
 const toJson = (model)=> JSON.stringify(serializeModel()(model))

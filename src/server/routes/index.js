@@ -19,5 +19,6 @@ module.exports = {
     router,
     ActionRouter: require('./action'),
     UserRouter: require('./user'),
-    PageViewRouter: require('./page_view')
+    PageViewRouter: require('./page_view'),
+    NeuralStepRouter: require('./neural_step')
 }

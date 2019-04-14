@@ -202,19 +202,17 @@ class TextField extends Field {
          * Similarity is a Number between 0 and 1 
          *
          * @param query {String}
-         * @returns ({Object})=> {Number}
+         * @returns {Function} :: ({Object}) => {Number}
          */
         try {
 
             const serializedQuery = serializeString(query)
             const similarity = R.compose(
                 serializeValue,
-                // R.curry(stringSimilarity.compareTwoStrings)(serializedQuery),
                 (concreteField)=> stringSimilarity.compareTwoStrings(serializedQuery, concreteField),
                 (obj)=> this.view(obj)
             )
 
-            // return this.compose(similarity)
             return similarity
         } catch(err) {
             this.catchError(err, query)
@@ -306,21 +304,21 @@ class FieldSpec {
          * 
          * @param {Object} query_map - Query data to compare each object to
          * @param {Object} data - Data to compare to the query data
-         * @returns {Object[]} Object of comparison values (Floats between 0-1)
+         * @returns {Object[]} Object where the keys are field names
+         *                     & values are comparison values (Floats between 0-1)
          */
         const field_map = this.field_map
-        const specMap = this._spec ? this._spec : this.setQuery(query_map)
+        // CR 2019-Mar-31: Commenting out this "optimization" to determine if
+        // it's the root cause of some comparisons staying cached
+        // const specMap = this._spec ? this._spec : this.setQuery(query_map)
+        const specMap = this.setQuery(query_map)
+
         // specMap provides a way to look up the predicate
-        // returned by `myField.similarity()`.
-        // Since the predicate function always accepts
-        // an Object and returns a Float, we just need
-        // to return an Object of comparisons (Floats)
-        const comparisonMap = reduceToMap(
-            (accum, item)=> [item, (specMap[item])(data)],
+        // returned by `myField.similarity()`. Build out an Object like { field_name: comparison_value }
+        return reduceToMap(
+            (accum, item)=> [item, specMap[item](data)],
             Object.keys(field_map)
         )
-
-        return comparisonMap
     }
 
     toPair(query_map, data) {

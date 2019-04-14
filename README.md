@@ -19,22 +19,23 @@ If existing services for analytics aren't quite cutting it, then you may be bett
 
 
 ## TODO
-- [x] Create in-app example page to see live demo.
-- [x] Implement Search Relevance Neural Network.  Implement utilities to make it easier to build a Neural Network using 'Actions'.
+- [x] - Create in-app example page to see live demo.
+- [x] - Implement Search Relevance Neural Network.  Implement utilities to make it easier to build a Neural Network using 'Actions'.
     - See 'src/server/neural'
-- [x] Implement data model for page views
-- [ ] Build example page view & action graphs
-    [ ] - Real-time Activity
-        [ ] - HTML Markup
-        [ ] - JS implementation
+- [x] - Implement data model for page views
+- [x] - Build example page view & action graphs
+    [x] - Real-time Activity
+        [x] - HTML Markup
+        [x] - JS implementation
         [ ] - Polish UI
-    
-    [ ] - Active user (time-series)
+    [ ] - Active users (time-series)
         [ ] - HTML Markup
         [ ] - JS implementation
         [ ] - Polish UI
 
-    [ ] - Page Activity (Sankey diagram)
-        [ ] - HTML Markup
-        [ ] - JS implementation
-        [ ] - Polish UI
+- [ ] - Clean up & refactor controllers & models to use modules.  Group files in modules based on app usage - ie. User, Account, and UserSessions can go in a 'user' module.  Implement service layer for common app functionalities.  Leverage Future, Either, & Io monads for service layer (chainable, immutable way to handle branching & errors in a pipeline)
+
+- [ ] - Implement Neural network for Page Views
+    [ ] - Predict the sequence of pages a user will follow based on the year, month, day of month, day of week, and time of day
+        - Input: year, month, day, day_of_week
+        - Output: Url, index

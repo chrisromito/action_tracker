@@ -65,24 +65,36 @@ const deleteRandomAccounts = ()=> {
     ]))
 }
 
-const randomSearchTargetSpec = R.compose(
-    R.mergeDeepRight({
+
+
+
+const shuffle = (str)=> str.split('').sort(()=> 0.5 - Math.random()).join('')
+const letters = 'abcdefghijklmnopqrstuvwxyz'
+
+const appendRandomLetters = (str)=> str + ' ' + randomQueryString(shuffle(letters))
+
+
+const randomSearchTargetSpec = (obj)=> {
+    const fields = ['first_name', 'last_name', 'username']
+
+    const randomFirstNameSearch = appendRandomLetters(
+        R.prop('first_name', obj)
+    )
+
+    const randomizedFields = fields.reduce((accum, field_name)=> {
+        accum[field_name] = randomFirstNameSearch
+        return accum
+    }, {})
+
+    console.log(`randomized fields: ${JSON.stringify(randomizedFields, null,  4)}`)
+    return R.mergeDeepRight({
         id: null,
         name: 'User'
-    }),
-    R.applySpec({
-        data: {
-            first_name: R.identity,
-            last_name: R.identity,
-            username: R.identity
-        },
-        query: R.identity
-    }),
-    randomQueryString,
-    R.view(R.lensPath([
-        randomItemFrom(['first_name', 'last_name', 'username'])
-    ]))
-)
+    }, {
+        data: randomizedFields,
+        query: randomFirstNameSearch
+    })
+}
 
 /**
  * @func generateRandomSearchActions - Generate Search Actions based on
@@ -120,7 +132,6 @@ const cyclicIndex = (arr, index)=> {
 
 const randomSearchAction = (users, day_threshold, index)=> {
     const user = cyclicIndex(users, index)
-    console.log(`randomSearchAction.user: ${user} \nUser.id: ${user.id}`)
     const timestamp = randomTimeFrom(day_threshold * MS_PER_DAY)
 
     return {
@@ -164,7 +175,7 @@ const generateRandomSearchActions = (n, day_threshold=DAYS_PER_HALF_YEAR)=> User
     })
 
 
-const initUserSearchActions = (n=5000)=> deleteRandomAccounts()
+const initUserSearchActions = (n=500)=> deleteRandomAccounts()
     .then(generateRandomAccounts)
     .then(()=> generateRandomSearchActions(n))
     .catch(console.log)
@@ -177,26 +188,3 @@ module.exports = {
     generateRandomSearchActions,
     initUserSearchActions
 }
-
-
-const _COPY_PASTE_IN_NODE_SHELL = `
-
-var R = require('ramda')
-var models = {
-    User,
-    Action,
-    Account
-} = require('./src/server/models/index')
-var foo = {
-    getTestAccounts,
-    generateRandomAccounts,
-    generateRandomSearchActions,
-    initUserSearchActions
-} = require('./src/server/neural/test_data/user_generator')
-
-
-var randomActions = []
-
-initUserSearchActions().then((results)=> randomActions = results)
-
-`
