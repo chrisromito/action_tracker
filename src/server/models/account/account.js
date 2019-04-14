@@ -1,5 +1,5 @@
 /**
- * @module user Provides User model
+ * @module account Provides Account model
  * Fields:
  *      username {String}
  *      password {String}
@@ -66,7 +66,6 @@ AccountSchema.pre('save', function(next) {
     }
 
     return bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
-        console.log('gen-salt')
         if (err) {
             return next(err)
         }
@@ -75,9 +74,8 @@ AccountSchema.pre('save', function(next) {
             if (err) {
                 return next(err)
             }
-
             user.password = hash
-            return next(user)
+            next()
         })
     })
 })

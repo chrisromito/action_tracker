@@ -1,4 +1,5 @@
 @import '../styles/colors';
+@import '../common/popover/popover.scss';
 
 .mdc-top-app-bar {
     z-index: 7;
@@ -9,7 +10,16 @@
 //*============================================*//
 .chart--container {
     margin: 20px auto 0 auto;
+    transform: $hiddenTransform;
+
+    &.chart--visible {
+        transform: $visibleTransform;
+    }
 }
+//
+//$hiddenTransform: translate(200vw, 0);
+//$visibleTransform: translate(0, 0);
+
 
 .chartist-tooltip {
     position: absolute;
@@ -44,6 +54,9 @@
 // // Provide defaults for chartist to work with
 $ct-text-color: rgba($primary-dark, 0.4);
 $ct-grid-color: rgba($primary-dark, 0.15);
+
+
+
 
 
 

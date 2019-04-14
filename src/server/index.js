@@ -111,12 +111,20 @@ app.use('/', routes.router)
 app.use('/', routes.ActionRouter)
 app.use('/', routes.UserRouter)
 app.use('/', routes.PageViewRouter)
+app.use('/', routes.NeuralStepRouter)
+
+
+
+app.use(function(err, req, res, next) {
+    console.log(`\n\n\nHit an error: ${err}\n\n\n`)
+    return res.send(String(err))
+})
 
 
 app.set('view engine', 'html')
 
 const port = process.env.PORT
 
-const appPort = !port || port === null || port == '' ? 8080 : port
+const appPort = !port || port === '' ? 8080 : port
 
 app.listen(appPort, () => console.log(`Listening on port ${appPort}`))

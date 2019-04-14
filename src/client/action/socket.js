@@ -1,5 +1,5 @@
-import { webSocket } from 'rxjs/webSocket';
-import { first } from 'rxjs/operators';
+import { webSocket } from 'rxjs/webSocket'
+import { first } from 'rxjs/operators'
 // import { identity } from 'ramda';
 import * as R from 'ramda';
 import { Action, EventAction } from '../../shared/interfaces/action';
@@ -21,8 +21,7 @@ export const defaultSubscriberConfig = {
 
 export class ActionSocket {
     constructor(socketConfig) {
-        const config = R.mergeDeepRight(defaultSocketConfig, socketConfig)
-        this.socketConfig = config
+        this.socketConfig = R.mergeDeepRight(defaultSocketConfig, socketConfig)
         this.socket = null  //webSocket(config.url)
         this.subscriberConfig = {} // subscriberConfig
     }

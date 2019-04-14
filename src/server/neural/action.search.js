@@ -6,7 +6,7 @@ const { Container } = require('../../shared/functional_types/base')
 // Models & Data
 const { Action, actionTypes, NeuralStep } = require('../models/index')
 const { FieldSpec } = require('./field')
-
+const brain = require('brain.js')
 
 /**
  * Lenses & Utils
@@ -23,7 +23,7 @@ const selectedActionFilter = R.filter(R.propEq('actionType', actionTypes.searchS
 
 const getLatestActionId = R.compose(
     R.tryCatch(
-        R.pipe(R.prop('_id'), R.lensIndex(0)),
+        R.pipe(R.last, R.prop('_id')),
         R.always(null)
     ),
     R.sortBy(R.view(timeStampLens))
@@ -53,6 +53,12 @@ class NetworkContext extends Container  {
 }
 
 
+const objectToMap = (obj)=> Object.entries(obj).reduce((accum, [k, v])=> {
+    accum.set(k, v)
+    return accum
+}, new Map())
+
+
 
 class SearchRelevanceNetwork {
     constructor(modelName, fieldSpec, context=null, debug=true) {
@@ -77,7 +83,7 @@ class SearchRelevanceNetwork {
         /**
          * @method getLastStep - Get the most recent NeuralStep where
          * this.modelName was 'assessed'
-         * @returns {Promise :: => {NeuralStep}}
+         * @returns {Promise <NeuralStep>}
          */
         const filterParams = { originModel: this.modelName }
         const sortParams = { sort: { timestamp: -1 }}
@@ -90,18 +96,30 @@ class SearchRelevanceNetwork {
             })
     }
 
-    saveStep(network, lastActionId) {
+    saveStep(network, networkData, lastActionId) {
         /**
          * @method saveStep - Save the 'state' of the network by creating
          * a new NeuralStep instance
          * @param {RNNTimeStep} network
+         * @param {Object[]} networkData: The data used to train the network
          * @param {(String|null)=null} lastActionId
-         * @returns {Promise} => {NeuralStep}
+         * @returns {Promise <(NeuralStep|null)>}
          */
+        // Build the map based off the result of running
+        // the network against the input that was used to train it
+        // const predictedWeights = network.run(networkData[0].input)
+        const predictedWeights = network.run(
+            network.forecast(networkData, 1)
+        )
+        if (!predictedWeights) {
+            return Promise.resolve(null)
+        }
+
+        const stepDataMap = objectToMap(predictedWeights)
         return new NeuralStep({
             origin: lastActionId,
             originModel: 'Action',
-            data: network.forecast(),
+            data: stepDataMap,
             meta: JSON.stringify(network.toJSON())
         }).save().then((step)=> {
             this.context.step = step
@@ -112,12 +130,14 @@ class SearchRelevanceNetwork {
     getConfig() {
         return {
             log: true,
-            iterations: 5000
+            // iterations: 1000,
+            // errorThresh: 0.1,
+            // learningRate: 0.2
         }
     }
 
     getNetwork(last_step=null) {
-        const network = new brain.recurrent.RNNTimeStep()
+        const network = new brain.recurrent.RNNTimeStep(this.getConfig())
         const mStep = Maybe(last_step)
         if (mStep.isJust) {
             // Help the network remember where it left off
@@ -180,6 +200,7 @@ class SearchRelevanceNetwork {
 
                 // Get the network training data & train it
                 const networkData = this.actionRelevance(actions)
+
                 const config = this.getConfig()
 
                 const start_time = Date.now()
@@ -191,13 +212,14 @@ class SearchRelevanceNetwork {
                 this._logger(`End training session @ ${end_time}`)
 
                 // Save the step, then return our trainingContext
-                return this.saveStep(network, getLatestActionId(actions))
-                    .then(()=> ({
-                        results: network.forecast(),
+                return this.saveStep(network, networkData, getLatestActionId(actions))
+                    .then((neural_step)=> ({
                         start: start_time,
                         end: end_time,
                         actions,
-                        networkData
+                        network,
+                        networkData,
+                        neural_step
                     }))
             })
     }

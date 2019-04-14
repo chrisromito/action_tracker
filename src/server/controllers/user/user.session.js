@@ -1,7 +1,7 @@
 
 const Maybe = require('maybe')
 const R = require('ramda')
-const { User, UserSession, Action } = require('../models/index');
+const { User, UserSession, Action } = require('../../models/index');
 const {
     tryOrNull,
     viewRequest,
@@ -9,7 +9,8 @@ const {
     sessionIdLens,
     getUserId,
     getRequestUser
-} = require('./common')
+} = require('../common/common')
+const SessionMonad = require('./interfaces')
 
 
 /**
@@ -122,6 +123,8 @@ const setSession = (context)=> setUser(context)
         context.request.session.session_id = session.id
         // context.request.session.save
         // return session
+        console.log('setSession - sessionID:')
+        console.log(session.id)
 
         return new Promise((resolve, reject)=> {
             context.request.session.save(

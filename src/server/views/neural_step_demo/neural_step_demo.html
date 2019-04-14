@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block nav %}
+{% include 'neural_step_demo/app_bar.html' %}
+{% endblock %}
+
+{% block body %}
+{# Graph/Chart main div holds all the 'container' divs, which facilitates showing/hiding different charts based on the selected menu item in 'app_bar.html' #}
+<div id="app" class="chart--main width--95 flex jc ac pad--v-10 pad--v-10 margin--auto">
+    {# Real-time: Active user stream line chart #}
+    <div id="chart--real-time-container" class="chart--container chart--visible width--100">
+        <real-time></real-time>
+        <active-pages></active-pages>
+    </div>
+
+    {# Activity: User Activity Over a given period of time #}
+    <div id="activity--chart-container" class="chart--container width--100">
+        <activity-component></activity-component>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+<script async defer src="/neural_step_demo.bundle.js"></script>
+
+{% endblock %}

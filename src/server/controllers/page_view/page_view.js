@@ -1,6 +1,4 @@
 const R = require('ramda')
-const Maybe = require('maybe')
-const toPromise = require('../utils/to_promise').toPromise
 
 const {
     Account,
@@ -8,7 +6,7 @@ const {
     User,
     UserSession,
     PageView
-} = require('../models/index')
+} = require('../../models/index')
 
 const {
     toJson,
@@ -19,9 +17,11 @@ const {
     userIdLens,
     getUserId,
     getRequestUser,
+    socketContext,
     DateRangeFilter
 } = require('./common')
-const Io = require('../../shared/functional_types/io')
+const { setUser, setSession} = require('../user/user.session')
+const Io = require('../../../shared/functional_types/io')
 
 
 /**
@@ -73,10 +73,15 @@ const serializeModels = R.map(normalizeId)
  *=========================================*/
 
 const PageViewCharts = (req, res)=> {
-    const data = {}
-    return res.render('page_view_demo/page_view_demo.html', {
-        data
-    })
+    return setSession(socketContext({}, req))
+        .then((session)=> {
+            console.log('pageViewCharts - session')
+            console.log(session)
+            const data = {}
+            return res.render('page_view_demo/page_view_demo.html', {
+                data
+            })
+        })
 }
 
 

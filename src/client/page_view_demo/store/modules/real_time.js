@@ -1,6 +1,6 @@
 import * as R from 'ramda'
 import { Maybe } from 'ramda-fantasy'
-import { activeFilter, deltaSeconds } from '../../shared'
+import { deltaSeconds } from '../../shared'
 import * as Io from '../../../../shared/functional_types/io'
 import { uuid } from '../../../common/utils'
 
