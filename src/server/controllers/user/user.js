@@ -13,21 +13,16 @@
  *      
  */
 const R = require('ramda')
-const Maybe = require('maybe')
+const { fToPromise } = require('../../utils/future_promise_interop')
 
 const { check, validationResult } = require('express-validator/check')
-const { serializeModel } = require('../../utils/transform_fields')
-
-const {
-    Account,
-    Action,
-    User,
-    UserSession
-} = require('../../models/index')
+const { User } = require('../../models/index')
 
 const { UserInterface } = require('../../../shared/interfaces/index')
+const { SessionMonad } = require('./interfaces')
+const { UserService, SignUpSchema } = require('./service')
 
-const { DateRangeFilter } = require('./common')
+const { DateRangeFilter } = require('../common/common')
 
 
 /**
@@ -120,27 +115,6 @@ exports.userList = (req, res)=> {
 }
 
 
-
-/**
-    var testUserQuery = User.find({}, null, { sort: { created: -1 } }
-        ).skip(0
-        ).limit(5
-        ).populate('account'
-        ).populate({
-            path: 'sessions',
-            select: 'active ip_address device updated created', 
-            options: {
-                sort: {
-                    updated: -1  // Sort descending on 'updated' field
-                },
-                limit: 1
-            }
-        }).exec()
-*/
-
-
-
-
 // User detail - Get user by ID
 exports.userDetail = (req, res)=> User.findById(req.params.userId)
     .populate('account')
@@ -193,6 +167,7 @@ exports.userLoginGet = (req, res)=> {
  * @method userLoginPost : Validates submitted credentials (username & email),
  * & adds username, user ID, etc. to the requested session
  */
+
 exports.userLoginPost = [
     // Form validation
     check('username')
@@ -200,23 +175,26 @@ exports.userLoginPost = [
     check('password', 'Invalid credentials')
         .exists()
         .custom(
-            (value, {req})=> User.findOne({ username: value})
-                .populate('account')
-                .exec()
-                .then((user)=> user.passwordValid(req.body.password)
-                        .then((valid)=> {
-                            if (valid) {
-                                req.session.user_id = user._id
-                                req.session.user = user
-                            }
-                            return valid
-                        })
-                )
+            (value, {req})=> fToPromise(
+                UserService(req)
+                    .getAccountByUsername(value)
+                    .chain((account)=>
+                        UserService(req)
+                            .login(account, req.body.password)
+                    )
+            )
         ),
     //-- Request/Response
-    (req, res)=> {
+    (req, res)=> fToPromise(
+        UserService(req)
+            .getAccountByUsername(req.body.username)
+            .chain((account)=>
+                UserService(req)
+                    .login(account, req.body.password)
+            )
 
-    }
+    ).then((account)=> SessionMonad(req).map({ accountId: account._id }))
+        .then(()=> res.redirect('/home'))
 ]
 
 
@@ -232,26 +210,11 @@ exports.userSignupGet = (req, res)=> {
 
 
 /**
- * @method userCreate : Validate a POSTed user-form & create a User if everything is valid
+ * @method userSignupPost : Validate form, create an Account, User, & UserSession (if everything is valid)
+ * Then redirect to the home page
  */
 exports.userSignupPost = [
-    // Form validation Checks
-    check('password1').exists(),
-    check('password2', 'Passwords must be equal')
-        .exists()
-        .custom((value, {req})=> value === req.body.password1)
-        .isLength({min: 6, max: 250}),
-    check('username')
-        .exists()
-        .isEmail(),
-    check('first_name')
-        .exists()
-        .isLength({min: 1, max: 250}),
-    check('last_name')
-        .exists()
-        .isLength({min: 1, max: 250}),
-
-    //-- Request/Response
+    SignUpSchema,
     (req, res, next)=> {
         const errors = validationResult(req)
         // Render any validation errors & return
@@ -262,35 +225,16 @@ exports.userSignupPost = [
             return next()
         }
 
-        const body = req.body
-        // Create the new account & link the new user to the account
-        return new Account({
-            username: body.username,
-            password: body.password1,
-            first_name: body.first_name,
-            last_name: body.last_name
-        }).save()
-            .then(
-                (acct)=> new User({ account: acct._id }).save()
-                    .then((user)=> new UserSession({ user: user._id, active: true }).save()
-                                        .then((user_session)=> [user, user_session]))
-
-            )
-            .then(([user, user_session])=> {
-                console.log('Created user and UserSession')
-                console.log(`request session: ${req.session}`)
-                console.log(req.session)
-                req.session.id = user_session.id
-                req.session.session_id = user_session.id
-
-                req.session.user_id = user.id
-                req.session.user = user
-                console.log('created an account')
-                console.log(`User Session ID: ${user_session.id}`)
-                console.log(`User ID: ${user.id}`)
-                return user
-            // }).then((user)=> next(res.send(JSON.stringify(user))))
-            }).then((user)=> res.json(user))
+        return fToPromise(UserService(req).createAccount())
+            .then((context)=> {
+                // Set the account id, user session, etc. on the request session
+                SessionMonad(req).map({
+                    accountId: context.account._id,
+                    sessionId: context.userSession._id,
+                    user: context.user
+                })
+                return res.redirect('/home')
+            })
             .catch(next)
     }
 ]

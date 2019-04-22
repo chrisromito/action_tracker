@@ -29,7 +29,11 @@ const userRight = (context)=> User.findOneAndUpdate(
 
 // Create a User
 // userLeft :: => Promise() => User
-const userLeft = (context)=> new User({ active: true}).save()
+const userLeft = (context)=> {
+    console.log('userLeft')
+    console.log(User)
+    return new User({ active: true}).save()
+}
 
 
 const updateUser = R.ifElse(
@@ -87,12 +91,6 @@ const sessionLeft = (context)=> new UserSession({
     ip_address: requestIp(viewRequest(context)),
     device: getDevice(viewRequest(context))
 }).save()
-    .then((session)=> {
-        const user = getRequestUser(context)
-        user.sessions = user.sessions.concat(session._id)
-        user.save()
-        return session
-    })
 
 
 const hasSessionAndSessionId = R.allPass([
@@ -121,10 +119,6 @@ const setSession = (context)=> setUser(context)
     .then(getOrCreateSession)
     .then((session)=> {
         context.request.session.session_id = session.id
-        // context.request.session.save
-        // return session
-        console.log('setSession - sessionID:')
-        console.log(session.id)
 
         return new Promise((resolve, reject)=> {
             context.request.session.save(

@@ -33,9 +33,14 @@ If existing services for analytics aren't quite cutting it, then you may be bett
         [ ] - JS implementation
         [ ] - Polish UI
 
-- [ ] - Clean up & refactor controllers & models to use modules.  Group files in modules based on app usage - ie. User, Account, and UserSessions can go in a 'user' module.  Implement service layer for common app functionalities.  Leverage Future, Either, & Io monads for service layer (chainable, immutable way to handle branching & errors in a pipeline)
+- [x] - Clean up & refactor controllers & models to use modules.  Group files in modules based on app usage - ie. User, Account, and UserSessions can go in a 'user' module.
+    - Implement service layer for common app functionalities.
+    - Leverage Future, Either, & Io monads for service layer (chainable, immutable way to handle branching & errors in a pipeline)
+
+- [ ] - Implement data model for clients & domains.  Mimic SAAS platform where users will send requests from their site to this platform.
+    - Ex. Users on 'my.client-website.com' will run our plugin.  Our plugin sends requests to 'action-tracker.com/'.
 
 - [ ] - Implement Neural network for Page Views
     [ ] - Predict the sequence of pages a user will follow based on the year, month, day of month, day of week, and time of day
         - Input: year, month, day, day_of_week
-        - Output: Url, index
+        - Output: Url, index/sequence number

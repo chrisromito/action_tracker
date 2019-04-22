@@ -5,46 +5,52 @@ const R = require('ramda')
 const { Future } = require('ramda-fantasy')
 const { checkSchema } = require('express-validator/check')
 const { User, Account, UserSession } = require('../../models/index')
-const { pToFuture } = require('../../utils/future_promise_interop')
 const SessionMonad = require('./interfaces')
 
 
 
 /**
- * Services
- *=====================================================================================*/
+ * @function UserService - Service/interface for User-related actions
+ * 
+ * @method createAccount - Creates a UserAccount based on the data provided in request.body
+ * NOTE: This assumes the request body has been validated & sanitized
+ * @returns {Future[{ account: Account, user: User, userSession: UserSession}]}
+ * 
+ * @method getAccount - Get the account of the current user based on the request
+ * @returns {Future <(null|Error), Account}
+ * 
+ * @method getAccountByUsername
+ * @returns {Future <(null|Error), Account}
+ * 
+ * @method login - Resolves w/ the account, rejects failed login attempts
+ * @see SessionMonad
+ * @param {Account} account
+ * @param {String} password - Password entered by the user
+ * @returns {Future <Error, Account} - Resolves with the Account, Rejects Mongoose Errors and plain Errors
+ */
 
 const UserService = (request)=> ({
-    /**
-     * @method createAccount - Creates a UserAccount based on the data provided in request.body
-     * NOTE: This assumes the request body has been validated & sanitized
-     * @returns {Future[UserSession]}
-     */
     createAccount: ()=> CreateUserFuture(request.body),
 
-    /**
-     * @method getUser - Get the current user based on the request
-     * @returns {Future <(null|Error), User>} Future that resolves with a User and rejects w/ null or an Error
-     */
     getAccount: ()=> Future((reject, resolve)=> 
         Account.findById(
             SessionMonad(request).value().accountId
         )
-        .then((user)=> user ? resolve(user) : reject(user))
+        .then((account)=> account ? resolve(account) : reject(account))
         .catch(reject)
+    ),
+
+    getAccountByUserName: (username)=> Future((reject, resolve)=> 
+        Account.findOne({ username })
+            .then((account)=> account ? resolve(account) : reject(account))
+            .catch(reject)
     ),
 
     login: (account, password)=> Future((reject, resolve)=>
         account.passwordValid(password)
-            .then((valid)=> valid ? resolve(account) : reject(account))
+            .then((valid)=> valid ? resolve(account) : reject(new Error('Invalid credentials')))
             .catch(reject)
-    ).map((arg)=> {
-        // Map the account ID to the request session
-        // so calling 'fork(errHandler, successHandler)' on this Future
-        // Auto-magically updates the request
-
-        SessionMonad(request).map({ accountId: account._id })
-    })
+    )
 })
 
 
@@ -56,16 +62,19 @@ const UserService = (request)=> ({
  * @param {User} user
  * @returns {Future[(Error | UserSession)]}
  * 
- * @method updateUserActiveStatus - Update the 'active' status of a single UserStatus instance
- * @param {User} user
- * @param {Boolean} active
+ * @param {String} accountId
+ * @param {Boolean} active - Is this user object still active (being used)?
+ * We attempt to re-use User objects as much as possible, but ultimately
+ * they are meant to be ephemeral because they are used to track the
+ * activity of registered AND anonymous users.
+ * Inactive means it will not be used again.
  * @returns {Future[(Error | UserSession)]}
  */
 const UserSessionService = (request)=> ({
-    createSession: (user)=> Future((reject, resolve)=> 
+    createSession: (userId)=> Future((reject, resolve)=> 
         // Deactivate existing User Sessions, then create the new one
         UserSession.updateMany(
-            { user: user._id },
+            { user: userId },
             { active: false}
         )
         .save()
@@ -79,11 +88,15 @@ const UserSessionService = (request)=> ({
         .catch(reject)
     ),
 
-
-    /**
-     * FIXME: updateUserActiveStatus must update the user's session to 'is_active'
-     */
-    updateUserActiveStatus: (user, is_active)=> pToFuture(''),
+    updateUserActiveStatus: (accountId, active)=> Future((reject, resolve)=>
+        getUserSessionsForAccount(accountId)
+            .sort({ created: 'desc' })
+            .limit(1)
+            .update({ active })
+            .exec()
+            .then(resolve)
+            .catch(reject)
+    )
 
 })
 
@@ -152,19 +165,34 @@ const SignUpSchema = checkSchema({
 
 
 // Accounts
-const createAccount = (accountData)=> pToFuture(
+const createAccount = (accountData)=> Future((reject, resolve)=>
     new Account(accountData)
-        .save())
+        .save()
+        .then(resolve)
+        .catch(reject)
+)
 
-const createUser = (account)=> pToFuture(
-    new User({ account: account._id, active: true })
-        .save())
+const createUser = (context)=> Future((reject, resolve)=>
+    new User({ account: context.account._id, active: true })
+        .save()
+        .then((user)=> ({
+            account: context.account,
+            user
+        }))
+        .catch(reject)
+)
 
-const createUserSession = (user, data=null)=> pToFuture(
+const createUserSession = (context, data=null)=> Future((reject, resolve)=>
     new UserSession(
         Object.assign({}, data || {}, { user: user._id, active: true })
-    ).save())
-
+    ).save()
+        .then((userSession)=> ({
+            account: context.account,
+            user: context.user,
+            userSession
+        }))
+        .catch(reject)
+)
 
 const CreateUserFuture = (accountData)=> createAccount(accountData)
     .chain(createUser)

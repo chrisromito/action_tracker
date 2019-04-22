@@ -4,10 +4,14 @@
     "browser": true,
     "node": true
   },
+  "extends": ["eslint:recommended"],
   "rules": {
     "no-console": "off",
     "comma-dangle": "off",
     "react/jsx-filename-extension": "off",
-    "semi": ["warn", "never"]
+    "semi": [
+      "warn",
+      "never"
+    ]
   }
 }

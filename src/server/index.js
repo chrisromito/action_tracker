@@ -7,7 +7,6 @@ const cors = require('cors')
 const nunjucks = require('nunjucks')
 const MongoDBStore = require('connect-mongodb-session')(session)
 
-const  { setSesssion } = require('./controllers/user.session')
 
 //-- Constants
 const IS_DEV = process.env.NODE_ENV !== 'production';

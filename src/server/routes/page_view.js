@@ -1,5 +1,5 @@
 const { Router } = require('express')
-const PageViewController = require('../controllers/page_view')
+const PageViewController = require('../controllers/page_view/page_view')
 
 const PageViewRouter = Router()
 

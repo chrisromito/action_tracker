@@ -17619,9 +17619,9 @@ var appendClass = function appendClass(obj, default_cls) {
   var cls = ' ' + default_cls;
 
   if (isTrue(obj.hasOwnProperty('class'))) {
-    obj.class += cls;
+    obj["class"] += cls;
   } else {
-    obj.class = cls;
+    obj["class"] = cls;
   }
 
   return obj;

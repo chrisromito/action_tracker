@@ -38,10 +38,9 @@ const PageViewSchema = new Schema({
         required: false
     },
 
-    url: String,
-    active: {
-        type: Boolean,
-        default: false
+    sequence: {
+        type: Number,
+        default: 0
     },
 
     meta: Schema.Types.Mixed,

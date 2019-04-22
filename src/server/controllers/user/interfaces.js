@@ -3,22 +3,41 @@
  * This exists solely to avoid having to search through the codebase to figure out how the hell to get the accountId
  */
 
+const R = require('ramda')
+
  
 const SessionMonad = (request)=> ({
     value: ()=> ({
-        accountId: request.session.accountId,
-        user: request.session.user,
-        sessionId: request.session.sessionId
+        clientId: request.session.clientId || null,
+        accountId: request.session.accountId || null,
+        user: request.session.user || null,
+        sessionId: request.session.sessionId || null
     }),
 
-    map: ({ accountId=undefined, user=undefined, sessionId=undefined})=> {
+    map: ({ accountId=undefined, clientId=undefined, user=undefined, sessionId=undefined})=> {
         // Set the key/val pairs on the request.session & return the request
-        const obj = {accountId, user, sessionId}
+        const obj = {accountId, clientId, user, sessionId}
         Object.entries(obj)
             .filter(([k, v])=> v !== undefined)
             .forEach(([k, v])=> request.session[k] = v)
         return request
     }
 })
+
+
+const sessionLens_ = R.lensPath(['session'])
+const composeSession = (propName)=> R.compose(sessionLens_, R.lensPath([propName]))
+
+SessionMonad.lenses = {
+    accountId: R.lensPath(['accountId']),
+    clientId: R.lensPath(['clientId']),
+    sessionId: R.lensPath(['sessionId']),
+    user: R.lensPath(['user']),
+
+    requestAccountId: composeSession('accountId'),
+    requestClientId: composeSession('clientId'),
+    requestSessionId: composeSession('sessionId'),
+    requestUser: composeSession('user'),
+}
 
 module.exports = SessionMonad

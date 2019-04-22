@@ -2,21 +2,13 @@
 // import * as Maybe from 'maybe';
 const R = require('ramda')
 const Maybe = require('maybe')
-const { serializeModel } = require('../../utils/transform_fields')
 const toPromise = require('../../utils/to_promise').toPromise
 
 
 const {
     toJson,
-    tryOrNull,
     socketContext,
-    requestLens,
-    socketLens,
     viewRequest,
-    sessionLens,
-    sessionIdLens,
-    userIdLens,
-    getUserId,
     getRequestUser,
     DateRangeFilter
 } = require('../common/common')

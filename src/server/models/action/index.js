@@ -13,6 +13,17 @@ const ActionSchema = new Schema({
 		type: Schema.Types.ObjectId,
 		required: false
 	},
+	userSession: {
+		ref: 'UserSession',
+		type: Schema.Types.ObjectId,
+		required: false
+	},
+
+	pageView: {
+		ref: 'PageView',
+		type: Schema.Types.ObjectId,
+		required: false
+	},
 
 	actionType: String,  // Ex. 'PATCH', 'search', 'click'
 

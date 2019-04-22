@@ -2,7 +2,7 @@
 const Maybe = require('maybe')
 const R = require('ramda')
 const serializeModel = require('../../utils/transform_fields').serializeModel
-
+const { SessionMonad } = require('../user/interfaces')
 
 const toJson = (model)=> JSON.stringify(serializeModel()(model))
 
@@ -12,11 +12,11 @@ const tryOrNull = (fn)=> R.tryCatch(fn, R.always(null))
  * @constant socketContext :: Wrap a websocket and request in an Object
  * this is used to simplify passing websocket context between functions
  *
- * @param {WebSocket} ws
- * @param {Request} req
+ * @param {WebSocket} socket
+ * @param {Request} request
  * @returns {Object}
  */
-const socketContext = (ws, req)=> ({ socket: ws, request: req})
+const socketContext = (socket, request)=> ({ socket, request})
 
 
 const requestLens = R.lensPath(['request'])

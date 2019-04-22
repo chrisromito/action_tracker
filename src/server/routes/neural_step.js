@@ -1,5 +1,5 @@
 const { Router } = require('express')
-const NeuralStepController = require('../controllers/neural_step')
+const NeuralStepController = require('../controllers/neural_step/neural_step')
 
 const NeuralStepRouter = Router()
 

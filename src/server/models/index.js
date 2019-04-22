@@ -1,6 +1,8 @@
 // import * as mongoose;
 // import mongoose from 'mongoose';
 const mongoose = require('mongoose')
+const glob = require('glob')
+const path = require('path')
 
 
 const isDev = process.env.NODE_ENV !== 'production';
@@ -30,18 +32,48 @@ db.once('open', ()=> {
 })
 
 
-//-- Now import & export our models
-const action = require('./action/action')
+//-- Import & export our models
+const _appModels = glob.sync('./src/server/models/**/index.js')
+    .filter((filePath)=> filePath.indexOf('migrations') <= -1)
+    .reduce((moduleExport, filePath)=> {
+        console.log('filePath:')
+        console.log(filePath)
+        const moduleToExport = require(path.resolve(filePath))
+        let tempExport = {}
+        console.log('moduleToExport: ')
+        console.log(moduleToExport)
 
-module.exports = {
-    User: require('./user/user').User,
-    UserSession: require('./user/user.session').UserSession,
-    Account: require('./account/account').Account,
-    Action: action.Action,
-    actionTypes: action.actionTypes,
-    IpLocation: require('./ip_location/ip_location').IpLocation,
-    NeuralStep: require('./neural_step/neural_step').NeuralStep,
-    PageView: require('./page_view/page_view').PageView,
-    Page: require('./page_view/page').Page,
-    DB_URL
-}
+        Object.entries(moduleToExport)
+            .forEach((pair)=> {
+                console.log('moduleToExport.forEach.pair:')
+                console.log(pair)
+                const key = pair[0]
+                const value = pair[1]
+                tempExport[key] = value
+            })
+
+        Object.entries(moduleExport)
+            .forEach((pair)=> {
+                console.log('moduleExport.forEach.pair:')
+                console.log(pair)
+                const key = pair[0]
+                const value = pair[1]
+                tempExport[key] = value
+            })
+        return tempExport
+    }, { DB_URL })
+
+module.exports = _appModels
+
+// module.exports = {
+//     User: require('./user/user').User,
+//     UserSession: require('./user/user.session').UserSession,
+//     Account: require('./account').Account,
+//     Action: action.Action,
+//     actionTypes: action.actionTypes,
+//     IpLocation: require('./ip_location').IpLocation,
+//     NeuralStep: require('./neural_step').NeuralStep,
+//     PageView: require('./page_view/page_view').PageView,
+//     Page: require('./page_view/page').Page,
+//     DB_URL
+// }

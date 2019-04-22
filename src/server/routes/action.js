@@ -1,5 +1,5 @@
 const Router = require('express').Router
-const action = require('../controllers/action')
+const action = require('../controllers/action/action')
 
 const socketContext = action.socketContext
 
