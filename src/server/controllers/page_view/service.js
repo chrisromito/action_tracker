@@ -41,8 +41,8 @@ const PageService = ({ url, sessionMonad }) => ({
         Domain.find()
             .where('client', sessionMonad.value().clientId)
             .or([
-                { 'url.host': url.host },
-                { 'url.hostname': url.hostname }
+                { 'host': url.host },
+                { 'hostname': url.hostname }
             ])
             .exec()
             .then((domains) => domains[0])
@@ -56,22 +56,18 @@ const PageService = ({ url, sessionMonad }) => ({
      * it's valid for the client, we just need to grab the clientId from the domain
      * to pass that validity check down the chain.
      */
-    getPage: () => PageService({ url, sessionMonad })
-        .getDomain()
-        .chain((domain) =>
-            Future((reject, resolve) =>
-                Page.find()
-                    .where('client', domain.client)
-                    .where('url.pathname', url.pathname)
-                    .or([
-                        { 'url.host': url.host },
-                        { 'url.hostname': url.hostname }
-                    ])
-                    .exec()
-                    .then((pages) => pages[0])
-                    .then(resolve)
-                    .catch(reject)
-            )
+    getPage: () =>Future((reject, resolve) =>
+            Page.find()
+                .where('client', sessionMonad.value().clientId)
+                .where('url.pathname', url.pathname)
+                .or([
+                    { 'url.host': url.host },
+                    { 'url.hostname': url.hostname }
+                ])
+                .exec()
+                .then((pages) => pages[0])
+                .then(resolve)
+                .catch(reject)
         ),
 
     /**
@@ -86,10 +82,10 @@ const PageService = ({ url, sessionMonad }) => ({
      */
     getOrCreatePage: () => PageService({ url, sessionMonad })
         .getPage()
-        .chainReject((domain) =>
+        .chainReject(() =>
             Future((reject, resolve) =>
                 new Page({
-                    client: domain.client,
+                    client: sessionMonad.value().clientId,
 
                     url: {
                         href: url.href,
@@ -129,9 +125,9 @@ PageViewService.liftRequest = liftRequest(PageViewService)
 
 const PvService_ = (context) => ({
 
-    _create: (pageId, { ...pageArgs }) => Future((reject, resolve) =>
+    _create: (pageId, { ...kwargs }) => Future((reject, resolve) =>
         new PageView({
-            ...pageArgs,
+            ...kwargs,
             userSession: context.sessionMonad.value().sessionId,
             page: pageId
         }).save()
@@ -142,23 +138,23 @@ const PvService_ = (context) => ({
     // Create:: PvService_[U, SM] -> Future[e v]
     // Gets or creates the Page, based on 'url' {URL}
     // & populates a new PageView using the URL and the data in the sessionMonad
-    create: () => PageService(context)
+    create: (kwargs) => PageService(context)
         .getOrCreate()
         .chain((page) =>
             PvService_(context)
-                ._create(page._id)
+                ._create(page._id, kwargs)
         ),
 
     createFromLast: R.curry(createFromLast)((context)),
 
     createFromParent: R.curry(createFromParent)(context),
 
-    createSequence: (parentId = null) => PageService(context)
+    createSequence: (parentId = null, kwargs={}) => PageService(context)
         .getOrCreate()
         .chain((page) =>
             parentId
-                ? PvService_(context).createFromParent(parentId, page._id)
-                : PvService_(context).createFromLast(page._id)
+                ? PvService_(context).createFromParent(parentId, page._id, kwargs)
+                : PvService_(context).createFromLast(page._id, kwargs)
         ),
 
     getLastPageView: R.curry(getLastPageView)(context)
@@ -169,7 +165,7 @@ const PvService_ = (context) => ({
  * Helper Functions
  */
 
-const createFromParent = (context, parentId, pageId) =>
+const createFromParent = (context, parentId, pageId, kwargs={}) =>
     Future((reject, resolve) =>
         PageView.findById(parentId)
             .exec()
@@ -178,16 +174,18 @@ const createFromParent = (context, parentId, pageId) =>
     ).chain((pv) =>
         PvService_(context)
             ._create(pageId, {
+                ...kwargs,
                 parent: pv._id,
                 sequence: pv.sequence + 1
             })
     )
 
 
-const createFromLast = (context, pageId) => getLastPageView(context, pageId)
+const createFromLast = (context, pageId, kwargs={}) => getLastPageView(context, pageId)
     .chain((pv) =>
         PvService_(context)
             ._create(pageId, {
+                ...kwargs,
                 parent: pv ? pv._id : null,
                 sequence: pv ? pv.sequence + 1 : 0,
             })

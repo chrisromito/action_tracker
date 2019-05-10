@@ -8,7 +8,6 @@ const { User, Account, UserSession } = require('../../models/index')
 const SessionMonad = require('./interfaces')
 
 
-
 /**
  * @function UserService - Service/interface for User-related actions
  * 
@@ -31,6 +30,12 @@ const SessionMonad = require('./interfaces')
 
 const UserService = (request)=> ({
     createAccount: ()=> CreateUserFuture(request.body),
+    createUser: ()=> UserService(request).getAccount()
+        .map((account)=> ({ account }))
+        .chain(createUser)
+        .chainReject(()=>
+            createUser( SessionMonad(request).value() )
+        ),
 
     getAccount: ()=> Future((reject, resolve)=> 
         Account.findById(
@@ -54,7 +59,6 @@ const UserService = (request)=> ({
 })
 
 
-
 /**
  * @function UserSessionService {Functor}
  * @method createSession - create a new UserSession for the given User.
@@ -74,15 +78,15 @@ const UserSessionService = (request)=> ({
     createSession: (userId)=> Future((reject, resolve)=> 
         // Deactivate existing User Sessions, then create the new one
         UserSession.updateMany(
-            { user: userId },
+            { user: userId, active: true },
             { active: false}
         )
         .save()
         .then(()=> new UserSession({
-                user: user._id,
+                user: userId,
                 active: true,
                 ip_address: getHeaderIp(request),
-                device: req.headers ? req.headers['user-agent'] : null
+                device: request.headers ? request.headers['user-agent'] : null
             }).save())
         .then(resolve)
         .catch(reject)
@@ -101,19 +105,15 @@ const UserSessionService = (request)=> ({
 })
 
 
-
 /**
  * Utils
  */
-
 const getHeaderIp = R.compose(
     (ip_address)=> String(ip_address).split(',')[0].trim(),
     (req)=> req.headers && req.headers['x-forwarded-for']
         ? req.headers['x-forwarded-for']
         : req.connection.remoteAddress
 )
-
-
 
 
 const existsAndLengthIsOneToTwoFifty_ = {
@@ -125,6 +125,7 @@ const existsAndLengthIsOneToTwoFifty_ = {
         }
     }
 }
+
 
 /**
  * @exports SignUpSchema - express-validator schema for creating a new User
@@ -150,7 +151,7 @@ const SignUpSchema = checkSchema({
             }
         },
         custom: {
-            options: (value, { request })=> value === req.body.password1
+            options: (value, { request })=> value === request.body.password1
         }
     },
 
@@ -172,31 +173,42 @@ const createAccount = (accountData)=> Future((reject, resolve)=>
         .catch(reject)
 )
 
+
 const createUser = (context)=> Future((reject, resolve)=>
-    new User({ account: context.account._id, active: true })
+    new User({
+            account: context.account ? context.account._id : null,
+            active: true,
+            client: context.account ? context.account.client : context.clientId
+        })
         .save()
         .then((user)=> ({
             account: context.account,
             user
         }))
+        .then(resolve)
         .catch(reject)
 )
 
+
 const createUserSession = (context, data=null)=> Future((reject, resolve)=>
     new UserSession(
-        Object.assign({}, data || {}, { user: user._id, active: true })
+        Object.assign({}, data || {}, { user: context.user._id, active: true })
     ).save()
         .then((userSession)=> ({
             account: context.account,
             user: context.user,
             userSession
         }))
+        .then(resolve)
         .catch(reject)
 )
 
+
 const CreateUserFuture = (accountData)=> createAccount(accountData)
+    .map((account)=> ({ account }))
     .chain(createUser)
     .chain(createUserSession)
+
 
 /**
  * @function getUserSessionsForAccount - Helper function for
@@ -216,7 +228,6 @@ const getUserSessionsForAccount = (accountId)=> UserSession.find({})
             model: 'Account'
         }
     })
-
 
 
 module.exports = {

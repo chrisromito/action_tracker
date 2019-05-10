@@ -1,6 +1,17 @@
 const express = require('express')
 const router = express.Router()
 
+// Routers
+const api = require('./api/index')
+const UserRouter = require('./user')
+const ActionRouter = require('./action')
+const NeuralStepRouter = require('./neural_step')
+
+router.use('/', api)
+router.use('/', UserRouter)
+router.use('/action', ActionRouter)
+router.use('/neural_step', NeuralStepRouter)
+
 //-- Action Demo Page
 router.get('/test', (req, res)=> {
     console.log('Home page')
@@ -15,10 +26,4 @@ router.get('/popover', (req, res)=> res.render('popover.html'))
 
 
 // App/API routers
-module.exports = {
-    router,
-    ActionRouter: require('./action'),
-    UserRouter: require('./user'),
-    PageViewRouter: require('./page_view'),
-    NeuralStepRouter: require('./neural_step')
-}
+module.exports = router

@@ -3,7 +3,7 @@
  */
 const { Future } = require('ramda-fantasy')
 const { checkSchema } = require('express-validator/check')
-const { Action, ActionTypes } = require('../../models')
+const { Action, actionTypes } = require('../../models')
 
 
 
@@ -91,7 +91,7 @@ const ActionQuery = (q)=> ({
  * @param {Action} searchActionId
  * @returns {Future[Error Action]}
  */
-const SearchAction = (modelName, userId=null, userSessionId=null, breadCrumbs=null)=> ({
+const SearchAction = (modelName, userSessionId=null, breadCrumbs=null)=> ({
 
     create: (targetData)=>
         Future((reject, resolve)=> 
@@ -99,7 +99,6 @@ const SearchAction = (modelName, userId=null, userSessionId=null, breadCrumbs=nu
                 actionType: actionTypes.search,
                 breadCrumbs: breadCrumbs || [],
                 target: targetData,
-                user: userId,
                 userSession: userSessionId
             }).save()
                 .then(resolve)
@@ -118,7 +117,6 @@ const SearchAction = (modelName, userId=null, userSessionId=null, breadCrumbs=nu
                         id: searchAction._id,
                         name: modelName,
                     },
-                    user: userId,
                     userSession: userSessionId
                 }).save()
             )
@@ -132,7 +130,7 @@ const SearchAction = (modelName, userId=null, userSessionId=null, breadCrumbs=nu
 const ActionSchema = checkSchema({
     actionType: {
         custom: {
-            options: (value)=> ActionTypes.indexOf(value) > -1
+            options: (value)=> actionTypes.indexOf(value) > -1
         }
     },
 

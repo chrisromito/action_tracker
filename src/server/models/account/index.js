@@ -23,6 +23,12 @@ const SALT_WORK_FACTOR = 10
 
 
 const AccountSchema = new Schema({
+	client: {
+		ref: 'Client',
+		type: mongoose.Schema.Types.ObjectId,
+		required: true
+	},
+
     username: {
         type: String,
         required: true,

@@ -1,28 +1,29 @@
 /**
  * @module client - Provides the Client mongoose model, which is responsible for
  * maintaining clients/customers, their information, and their domains
-client */
+ */
 
 const { Schema, model } = require('mongoose')
-const { extendSchema, updatedCreatedSchema } = require('../utils/common_schemas')
+const { genericFields } = require('../utils/common_schemas')
 
-
-const DomainSchema = extendSchema(updatedCreatedSchema, {
-    client: {
-        ref: 'Client',
-        type: Schema.Types.ObjectId,
-        required: true
+const clientSchemaFields = {
+    active: {
+        type: Boolean,
+        default: false
     },
 
-    host: String,
-    hostname: String,
-    host: String,     // Does include the port
-    hostname: String, // Doesn't include the port
-    port: String,
-    protocol: String,  // http, https, ws, etc.
-    origin: String
-})
+    domains: [{
+        ref: 'Domain',
+        type: Schema.Types.ObjectId,
+        required: true
+    }],
 
-const Domain = model('Domain', DomainSchema)
+    // TODO: Add client key, client secret key, internal key, & internal secret key
+    // for authentication purposes
+}
 
-module.exports = { Domain }
+const ClientSchema = new Schema({ ...genericFields, ...clientSchemaFields })
+
+const Client = model('Client', ClientSchema)
+
+module.exports = { Client }

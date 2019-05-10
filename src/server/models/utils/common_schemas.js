@@ -1,5 +1,4 @@
 const { Schema } = require('mongoose')
-const extendSchema = require('./extend_schema')
 
 
 const defaultToNow = {
@@ -38,13 +37,12 @@ const nameSortOrder = {
 const nameSortOrderSchema = new Schema(nameSortOrder)
 
 
-const genericSchema = extendSchema(updatedCreatedSchema, nameSortOrder)
+const genericFields = {...updatedCreated, ...nameSortOrder}
 
 
 
 module.exports = {
     updatedCreatedSchema,
     nameSortOrderSchema,
-    genericSchema,
-    extendSchema
+    genericFields
 }

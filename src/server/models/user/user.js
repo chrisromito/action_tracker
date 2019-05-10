@@ -14,6 +14,12 @@ const UserSchema = new mongoose.Schema({
 		required: false
 	},
 
+	client: {
+		ref: 'Client',
+		type: mongoose.Schema.Types.ObjectId,
+		required: true
+	},
+
 	sessions: [{
 		ref: 'UserSession',
 		type: mongoose.Schema.Types.ObjectId,

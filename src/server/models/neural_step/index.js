@@ -12,12 +12,20 @@
  *
  */
 
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-const model = mongoose.model
+// const mongoose = require('mongoose')
+// const Schema = mongoose.Schema
+// const model = mongoose.model
+
+const { Schema, model } = require('mongoose')
 
 
 const NeuralStepSchema = new Schema({
+    //-- Is this Neural Network for a specific client?
+    client: {
+        ref: 'Client',
+		type: Schema.Types.ObjectId,
+        required: false
+    },
 
     //-- Dynamic Model lookup fields
     origin: {

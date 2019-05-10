@@ -2,7 +2,7 @@
 // import * as Maybe from 'maybe';
 const R = require('ramda')
 const Maybe = require('maybe')
-const toPromise = require('../../utils/to_promise').toPromise
+const { toPromise } = require('../../utils/to_promise')
 
 
 const {

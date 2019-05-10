@@ -3,6 +3,6 @@ const NeuralStepController = require('../controllers/neural_step/neural_step')
 
 const NeuralStepRouter = Router()
 
-NeuralStepRouter.get('/neural_step', NeuralStepController.NeuralStepList)
+NeuralStepRouter.get('/', NeuralStepController.NeuralStepList)
 
 module.exports = NeuralStepRouter

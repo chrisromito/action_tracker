@@ -1,5 +1,5 @@
 const Router = require('express').Router
-const action = require('../controllers/action/action')
+const action = require('../controllers/api/action')
 
 const socketContext = action.socketContext
 
@@ -14,7 +14,7 @@ const logMessage = (msg)=> console.log(`
 * WebSocket Implementation
 * @see www.npmjs.com/package/express-ws
 */
-ActionRouter.ws('/action', (ws, req)=> {
+ActionRouter.ws('/', (ws, req)=> {
 
     logMessage('Received ws request')
 

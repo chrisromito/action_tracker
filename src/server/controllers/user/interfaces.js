@@ -9,14 +9,15 @@ const R = require('ramda')
 const SessionMonad = (request)=> ({
     value: ()=> ({
         clientId: request.session.clientId || null,
+        domainId: request.session.domainId || null,
         accountId: request.session.accountId || null,
         user: request.session.user || null,
         sessionId: request.session.sessionId || null
     }),
 
-    map: ({ accountId=undefined, clientId=undefined, user=undefined, sessionId=undefined})=> {
+    map: ({ accountId=undefined, clientId=undefined, domainId=undefined, user=undefined, sessionId=undefined})=> {
         // Set the key/val pairs on the request.session & return the request
-        const obj = {accountId, clientId, user, sessionId}
+        const obj = {accountId, clientId, domainId, user, sessionId}
         Object.entries(obj)
             .filter(([k, v])=> v !== undefined)
             .forEach(([k, v])=> request.session[k] = v)

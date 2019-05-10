@@ -8,11 +8,6 @@ const { Schema, model } = require('mongoose')
 
 
 const ActionSchema = new Schema({
-	user: {
-		ref: 'User',
-		type: Schema.Types.ObjectId,
-		required: false
-	},
 	userSession: {
 		ref: 'UserSession',
 		type: Schema.Types.ObjectId,

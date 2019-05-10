@@ -5,7 +5,6 @@ const Io = require('../../shared/functional_types/io')
 const { Container } = require('../../shared/functional_types/base')
 // Models & Data
 const { Action, actionTypes, NeuralStep } = require('../models/index')
-const { FieldSpec } = require('./field')
 const brain = require('brain.js')
 
 /**
@@ -18,6 +17,8 @@ const searchFromSelected = R.view(R.compose(
     R.lensIndex(0),
     R.lensPath(['target', 'data'])
 ))
+
+
 const selectedActionFilter = R.filter(R.propEq('actionType', actionTypes.searchSelection))
 
 

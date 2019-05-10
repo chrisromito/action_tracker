@@ -6,13 +6,10 @@ const csrf = require('csurf')
 const cors = require('cors')
 const nunjucks = require('nunjucks')
 const MongoDBStore = require('connect-mongodb-session')(session)
-
+const authMiddleware = require('./middleware/auth')
 
 //-- Constants
 const IS_DEV = process.env.NODE_ENV !== 'production';
-
-
-//-- Pre-app middleware
 const { DB_URL } = require('./models/index')
 
 
@@ -89,12 +86,8 @@ app.use((req, res, next)=> {
     next()
 })
 
-
-// //-- User/Session middleware
-// const loginMiddleware = require('./middleware/login')
-
-// app.use(loginMiddleware())
-
+app.options('*', authMiddleware)
+app.use(authMiddleware)
 
 // Add csrfToken to the nunjucks context
 app.use((req, res, next)=> {
@@ -104,14 +97,9 @@ app.use((req, res, next)=> {
 
 
 
-/**  Routes 
+/**  Routes & Error Handling
  *==============================*/
-app.use('/', routes.router)
-app.use('/', routes.ActionRouter)
-app.use('/', routes.UserRouter)
-app.use('/', routes.PageViewRouter)
-app.use('/', routes.NeuralStepRouter)
-
+app.use('/', routes)
 
 
 app.use(function(err, req, res, next) {

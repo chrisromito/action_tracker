@@ -37,10 +37,11 @@ If existing services for analytics aren't quite cutting it, then you may be bett
     - Implement service layer for common app functionalities.
     - Leverage Future, Either, & Io monads for service layer (chainable, immutable way to handle branching & errors in a pipeline)
 
-- [ ] - Implement data model for clients & domains.  Mimic SAAS platform where users will send requests from their site to this platform.
+- [x] - Implement data model for clients & domains.  Facilitate functionality comparable to a
+        SAAS platform where users will send requests from their site to this platform.
     - Ex. Users on 'my.client-website.com' will run our plugin.  Our plugin sends requests to 'action-tracker.com/'.
 
 - [ ] - Implement Neural network for Page Views
-    [ ] - Predict the sequence of pages a user will follow based on the year, month, day of month, day of week, and time of day
-        - Input: year, month, day, day_of_week
-        - Output: Url, index/sequence number
+    [ ] - We want to be able to answer: "If Foo User is currently on page A, what page are they likely to go to next?"
+        - Input: year, month, day, dayOfTheWeek, timeOfDay, pageId, pageSequence
+        - Output: year, month, day, dayOfTheWeek, timeOfDay, pageId, pageSequence
