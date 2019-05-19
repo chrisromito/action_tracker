@@ -4,11 +4,11 @@ const { DateRangeFilter } = require('../common/common')
 const Io = require('../../../shared/functional_types/io')
 
 
-
 const normalizeId = R.over(
     R.lensPath(['id']),
     R.view(R.lensPath(['_id']))
 )
+
 
 const serializeModels = R.map(normalizeId)
 
@@ -34,11 +34,9 @@ const NeuralStepTemplate = (req, res)=> {
  *   2. How "relevant" is each field to the user (with respect to searching through data)?
  *   3. How has the significance of each field changed over time?
  *
- *
  * URL Filter Params:
  * timestamp_start {Number}
  * timestamp_end {Number}
- *
  *
  * @param req - Express Request Object
  * @param res - Express Response Object

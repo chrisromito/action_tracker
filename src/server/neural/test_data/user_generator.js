@@ -1,9 +1,9 @@
 const R = require('ramda')
 const { Action, actionTypes, User, Account } = require('../../models/index')
-const { randomIntBetween, randomQueryString, randomItemFrom } = require('./utils')
+const { randomIntBetween, randomQueryString } = require('./utils')
 const RandomUserAccounts = require('./test_accounts').data
 const pChain = require('../../utils/pchain')
-
+const { getTestClient } = require('./clients')
 
 /**
  * Account/User CRUD
@@ -14,32 +14,49 @@ const pChain = require('../../utils/pchain')
  * @func generateRandomAccounts - Generates random `Account` and `User` model instances from `./test_accounts.js`
  * @returns {User[]}
  */
-const generateRandomAccounts = ()=> {
-    const accountDetails = RandomUserAccounts.map((user)=> ({
-        username: `${user.first_name}${user.first_name}${randomIntBetween(1, 999999999999)}@actiontracker.test.com`,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        password: 'MySuperSafePassword'
-    }))
+const generateRandomAccounts = ()=> getTestClient()
+    .then((client)=> client._id)
+    .then((clientId)=> {
+        const accountDetails = RandomUserAccounts.map((user)=> ({
+            client: clientId,
+            username: `${user.first_name}${user.first_name}${randomIntBetween(1, 999999999999)}@actiontracker.test.com`,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            password: 'MySuperSafePassword'
+        }))
 
-    return Account.insertMany(accountDetails)
-        .then((accounts)=> {
-            const userDetails = accounts.map((a)=> ({
-                account: a._id,
-                active: true
-            }))
+        return Account.insertMany(accountDetails)
+            .then((accounts)=> {
+                const userDetails = accounts.map((a)=> ({
+                    account: a._id,
+                    active: true,
+                    client: clientId
+                }))
 
-            return User.insertMany(userDetails)
-        })
-}
+                return User.insertMany(userDetails)
+            })
+    })
 
 
 const getTestAccounts = ()=> Account.find({
-    _id: {
-        $in: accounts.map(R.prop('_id'))
-    }
+    username: /.*actiontracker.test.com/i
 }).exec()
 
+
+
+
+const getTestUsers = ()=> Account.find({
+        username: /.*actiontracker.test.com/i
+    })
+    .exec()
+    .then((accounts)=>
+        User.find({
+            account: {
+                $in: accounts.map(R.prop('_id'))
+            }
+        })
+        .exec()
+    )
 
 const _deleteRandomUsers = (accounts)=> User.deleteMany({
     account: {
@@ -152,10 +169,7 @@ const randomSearchAction = (users, day_threshold, index)=> {
 }
 
 
-const generateRandomSearchActions = (n, day_threshold=DAYS_PER_HALF_YEAR)=> User.find()
-    .where('account')
-    .exists()
-    .populate('account')
+const generateRandomSearchActions = (n, day_threshold=DAYS_PER_HALF_YEAR)=> getTestUsers()
     .exec()
     .then((users)=> {
         const indexRange = R.range(0, n)
@@ -184,7 +198,12 @@ const initUserSearchActions = (n=500)=> deleteRandomAccounts()
 
 module.exports = {
     getTestAccounts,
+    getTestUsers,
     generateRandomAccounts,
     generateRandomSearchActions,
-    initUserSearchActions
+    deleteRandomAccounts,
+    
+    initUserSearchActions,
+    randomTimeFrom,
+    cyclicIndex
 }

@@ -4,7 +4,7 @@
  * -----------------------------------------
  * 
  * 1. Sub Model - Handles query logic.  Provides immutable representations of PageView (mongoose.Query) instances, and NeuralNetwork instances
- *  - Type: DataState[m] -> DataState[b]
+ *  - Type: DataState[m] -> Future[Error, DataState[b]]
  *  - When given a DataState instance, it returns a Future bound to a 
  *     new DataState with the data set to an immutable set of mongoose.Query/mongoose.Model instances
  *  - This is where our query logic is handled
@@ -24,3 +24,10 @@
  * This ties all of the other components together.  It essentially just needs context to tell it who/what to run
  * - Type: State[a] -> Future[Error, b]
  */
+const types = require('./types')
+const data = require('./data')
+
+module.exports = {
+    types,
+    data
+}

@@ -1,9 +1,9 @@
 const brain = require('brain.js')
-
+const R = require('ramda')
 
 class BaseType {
     constructor(data, context) {
-        this._data = {...data}
+        this._data = data
         this._context = {...context}
     }
 
@@ -33,7 +33,7 @@ class BaseType {
          * with the same values as this instance
          * @returns {BaseType}
          */
-        const cls = this[Symbol.species]
+        const cls = this.constructor[Symbol.species]
         const args = Object.values(this.value())
         return new cls(...args)
     }
@@ -56,7 +56,7 @@ class BaseType {
          * @param {Function} fn - A 2-arity function
          * @returns {BaseType[a, b]}
          */
-        const cls = this[Symbol.species]
+        const cls = this.constructor[Symbol.species]
         return new cls(
             ...this.ap(fn)
         )
@@ -78,7 +78,7 @@ class DataState extends BaseType {
     }
 
     mapData(fn) {
-        const cls = this[Symbol.species]
+        const cls = this.constructor[Symbol.species]
         return new cls(
             fn(...this.args()),
             this.context()
@@ -87,10 +87,15 @@ class DataState extends BaseType {
 
     mapContext(fn) {
         // Deconstruct, apply fn, reconstruct
-        const cls = this[Symbol.species]
+        const cls = this.constructor[Symbol.species]
+        const newContext = R.mergeDeepRight(
+            this.context(),
+            fn(...this.args())
+        )
+
         return new cls(
             this.data(),
-            fn(...this.args())
+            newContext
         )
     }
 }

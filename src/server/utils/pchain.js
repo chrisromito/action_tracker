@@ -7,12 +7,12 @@
  *    Math.random() * (max - min)
  * ) + min
  * 
- * >>> var logThunk = (index)=> ()=> new Promise((resolve)=> setTimeout(()=> {
+ * >>> const logThunk = (index)=> ()=> new Promise((resolve)=> setTimeout(()=> {
  *    console.log(`Function index: ${index}`)
  *    resolve(index)
  * }, randomIntBetween(10, 1000))) 
  *
- * >>> var thunks = [
+ * >>> const thunks = [
  *    logThunk(0),
  *    logThunk(1),
  *    logThunk(2),

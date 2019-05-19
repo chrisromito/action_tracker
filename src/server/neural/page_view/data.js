@@ -1,62 +1,163 @@
 /**
  * @module data - Comprises the Sub Model & Data Model layers/components
- * @exports SubModel
- * @exports DataModel
+ * 
+ * @TLDR - pipe(NeuralSubModel[DataState], NeuralModel[DataState], PvSubModel[DataState], PvModel[DataState])
+ * 
+ * @doc
+ * The Sub Models manage how we query Mongoose models.  They are bound to a DataState, and most query methods
+ * return a Future that:
+ *  - Resolves w/ a new DataState with its 'data' set to a copy of the query results &/or updated context
+ *  - Rejects w/ the original DataState.  Errors are handled internally and will not propagate up.
+ * 
+ * The Data & Context obtained from the Sub Models determines how/what (if any)
+ * PageViews are used throughout the rest of the application.
+ * 
+ * The Models are bound to DataState, and provide generic ways to compose, map, apply, group, sort, etc.
+ * the underlying DataState's Data.
+ * 
+ * Note: Remember - SubModels return Future<Error, DataState>. Meanwhile, Models return Model<DataState> 
+ *
  */
 
 const R = require('ramda')
 const { Future, Maybe } = require('ramda-fantasy')
-const { BaseType, DataState } = require('./types')
-const { PageView, Client, User, UserSession, NeuralStep } = require('../../models')
+// const { BaseType, DataState } = require('./types')
+const { Page, PageView, NeuralStep } = require('../../models')
 
 
 //-- Utils
 const transformModels = R.compose(JSON.parse, JSON.stringify)
 
 
+
+//-- NeuralStep Sub Model
+
+const lastStep = (_, {clientId})=> NeuralStep.find()
+    .where('client', clientId)
+    .where('originModel', 'PageView')
+    .sort({ timestamp: 'desc' })
+    .limit(1)
+    .exec()
+
+
+const NeuralSubModel = (arg)=> ({
+    getLastStep: (dataState=arg)=> Future((reject, resolve)=>
+        lastStep(...dataState.args())
+            .then(transformModels)
+            .then((m)=> !m.length ? dataState : dataState.mapData(()=> m[0]))
+            .then(resolve)
+            .catch(reject)
+    ),
+
+    value: ()=> arg
+})
+
+NeuralSubModel.of = (...args)=> NeuralSubModel(...args)
+
+
+/**
+ * @func NeuralModel - Data transformations for NeuralSteps
+ * @param {(DataState|*)} arg
+ */
+const NeuralModel = (arg)=> ({
+    map: (fn)=> NeuralModel(arg.map(fn)),
+    mapData: (fn)=> NeuralModel(arg.mapData(fn)),
+    mapContext: (fn)=> NeuralModel(arg.mapContext(fn)),
+
+    getTimeStamp: ()=> {
+        // Since the DataState.data might contain a NeuralStep,
+        // this will either be a Nothing, or a Just w/ the value set
+        // to the 'timestamp' value of our last step
+        const mTimestamp = Maybe(arg.data())
+            .map(R.prop('timestamp'))
+        return Maybe(mTimestamp.value)
+    },
+
+    getLastStep: (arg)=> {
+        const mTimestamp = NeuralModel(arg).getTimeStamp()
+        const timeStampSetter = R.set(R.lensPath(['timestamp']))
+        const setContext = mTimestamp.isNothing
+            ? timeStampSetter(null)
+            : timeStampSetter(mTimestamp.value)
+
+        return NeuralModel(arg).mapContext(setContext)
+    },
+
+    value: ()=> arg
+})
+
+NeuralModel.of = (...args)=> NeuralModel(...args)
+
+
+
 //-- PageView Sub Model
 
-const clientPageViewsSince = (_, {clientId, minDate})=> PageView.find()
-    .where('page.client', clientId)
-    .or([
-        { updated: minDate },
-        { created: minDate }
-    ])
-    .populate('page')
-    .populate('children')
-    .populate({
-        path: 'userSession',
-        populate: {
-            path: 'user',
-            select: 'account active updated created'
-        }
-    })
-    .exec()
-    .then(transformModels)
+const clientPageViewsSince = (_, { clientId, timestamp=null })=>
+    Page.find()
+        .where('client', clientId)
+        .select('_id')
+        .exec()
+        .then(
+            R.map(R.prop('_id'))
+        ).then((pageIds)=> {
+            const query = PageView.find()
+                .where('page')
+                .in(pageIds)
+                .populate('page')
+                .populate({
+                    path: 'userSession',
+                    model: 'UserSession',
+                    populate: {
+                        path: 'user',
+                        model: 'User',
+                        select: 'account active updated created'
+                    }
+                })
+                .limit(10000) // Limit to 10k records
 
+            const filteredQuery = timestamp
+                ? query.or([
+                    { updated: { $gte: timestamp } },
+                    { created: { $gte: timestamp } }
+                ])
+                : query
 
-const futurePageViewsSince = (dataState)=> Future((reject, resolve)=>
-    clientPageViewsSince(...dataState.args())
-        .then((pageViews)=> dataState.mapData(()=> pageViews))
-        .then(resolve)
-        .catch(reject)
-)
-
+            return filteredQuery.exec()
+                .then(transformModels)
+        })
 
 /**
  * @func PvSubModel - Handles query logic for Client PageViews
  * 
  */
-const PvSubModel = ()=> ({
-    value: (dataState)=> futurePageViewsSince(dataState)
+const PvSubModel = (arg)=> ({
+    pageViewsSince: ()=> Future((reject, resolve)=>
+        clientPageViewsSince(...arg.args())
+            .then(transformModels)
+            .then((pv)=> arg.mapData(()=> pv))
+            .then(resolve) // Resolve w/ the updated DataState
+            .catch(reject)
+    ),
+
+    value: ()=> arg
 })
 
+PvSubModel.of = (...args)=> PvSubModel(...args)
 
-const userSessionLens = R.lensPath(['userSession', '_id'])
+
+
+
+const idLens = R.lensPath(['_id'])
+
+const pageLens = R.lensPath(['page'])
+
+const pageIdLens = R.compose(pageLens, idLens)
+
+const pageIndexLens = R.compose(pageLens, R.lensPath(['index']))
+
+const userSessionLens = R.compose(R.lensPath(['userSession']), idLens)
 
 const sequenceLens = R.lensPath(['sequence'])
-
-const urlLens = R.lensPath(['url'])
 
 
 /**
@@ -77,68 +178,34 @@ const PvModel = (arg)=> ({
         )
     ),
 
+    groupByPage: ()=> PvModel(arg).mapData(
+        R.groupWith(R.view(pageIdLens))
+    ),
+
     groupByUserSession: ()=> PvModel(arg).mapData(
         R.groupWith(R.view(userSessionLens))
     ),
 
+    // Set the URL property based on the Page's 'index'
+    // to facilitate data-normalization (NN normalization, not DB normalization)
     setUrl: ()=> PvModel(arg).mapData(
-        R.over(
-            urlLens,
-            R.view(R.lensPath(['page', 'index']))
+        R.map((o)=>
+            R.set(
+                R.lensPath(['url']),
+                R.view(pageIndexLens, o),
+                o
+            )
         )
     ),
 
-    sort: ()=> PvModel(arg).mapData(
-        R.sortBy(R.view(sequenceLens))
+    sort: (lens=sequenceLens)=> PvModel(arg).mapData(
+        R.sortBy(R.view(lens))
     ),
 
     value: ()=> arg
 })
 
-
-//-- NeuralStep Sub Model
-
-const lastStep = (_, {clientId})=> NeuralStep.find()
-    .where('client', clientId)
-    .where('originModel', 'PageView')
-    .sort('timestamp', 'desc')
-    .limit(1)
-    .exec()
-
-
-const NeuralSubModel = ()=> ({
-    getLastStep: (dataState)=> Future((reject, resolve)=>
-        lastStep(...dataState.args())
-            .then(transformModels)
-            .then(resolve)
-            .catch(reject)
-    )
-})
-
-
-/**
- * @func NeuralModel - Data transformations for NeuralSteps
- * @param {(DataState|*)} arg
- */
-const NeuralModel = (arg)=> ({
-    map: (fn)=> NeuralModel(arg.map(fn)),
-    mapData: (fn)=> NeuralModel(arg.mapData(fn)),
-    mapContext: (fn)=> NeuralModel(arg.mapContext(fn)),
-
-    getLastStep: (arg)=> {
-        const lastStep = Maybe(
-            R.prop(0, arg.data())
-        )
-        // If we have a last step, set our 'minDate' value based on the step's 'timestamp' value
-        const minDate = lastStep.isJust
-            ? lastStep.timestamp
-            : null
-        const setContext = R.set(R.lensPath(['minDate']), minDate)
-        return NeuralModel(arg).mapContext(setContext)
-    },
-
-    value: ()=> arg
-})
+PvModel.of = (...args)=> PvModel(...args)
 
 
 
@@ -146,5 +213,7 @@ module.exports = {
     PvSubModel,
     PvModel,
     NeuralSubModel,
-    NeuralModel
+    NeuralModel,
+
+    clientPageViewsSince
 }
